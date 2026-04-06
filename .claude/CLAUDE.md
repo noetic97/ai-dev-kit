@@ -7,9 +7,9 @@
 
 ## Project Overview
 
-**Name:** {{PROJECT_NAME}}
-**Description:** {{PROJECT_DESCRIPTION}}
-**Type:** {{PROJECT_TYPE}} <!-- e.g. API, CLI tool, full-stack app, library -->
+**Name:** ai-dev-kit
+**Description:** Personal Claude Code toolkit — steering files, slash commands, and project scaffolding
+**Type:** CLI <!-- e.g. API, CLI tool, full-stack app, library -->
 
 ---
 
@@ -17,11 +17,10 @@
 
 - **Runtime:** Bun
 - **Language:** TypeScript (strict)
-- **Frontend:** {{FRONTEND_FRAMEWORK}}
-- **Backend:** {{BACKEND_FRAMEWORK}}
-- **Database:** {{DATABASE}} <!-- e.g. PostgreSQL via Drizzle, SQLite, none -->
-- **Testing:** {{TEST_FRAMEWORK}} <!-- e.g. Bun test, Vitest -->
-- **Other key dependencies:** {{OTHER_DEPS}}
+- **Framework:** none <!-- e.g. Hono, Next.js, Elysia, none -->
+- **Database:** none <!-- e.g. PostgreSQL via Drizzle, SQLite, none -->
+- **Testing:** Bun test <!-- e.g. Bun test, Vitest -->
+- **Other key dependencies:** TBD
 
 ---
 
@@ -34,7 +33,7 @@
   src/lib/       — shared utilities
 -->
 
-{{ARCHITECTURE_DESCRIPTION}}
+<!-- TODO: describe your architecture -->
 
 ---
 
@@ -46,7 +45,7 @@
   - "Invoice" = a billable document, not "bill" or "receipt"
 -->
 
-{{DOMAIN_GLOSSARY}}
+<!-- TODO: define domain terms -->
 
 ---
 
@@ -54,7 +53,7 @@
 
 <!-- Paste or summarise your core types here so Claude has consistent context. -->
 
-{{KEY_TYPES}}
+<!-- TODO: paste key types here -->
 
 ---
 
@@ -62,7 +61,7 @@
 
 <!-- List APIs, services, and any auth patterns in use. -->
 
-{{INTEGRATIONS}}
+<!-- TODO: list external integrations -->
 
 ---
 
@@ -71,7 +70,7 @@
 <!-- Any project-specific deviations from the global CLAUDE.md.
   Example: "This project uses classes for database models due to the ORM." -->
 
-{{PROJECT_CONVENTIONS}}
+<!-- TODO: note any exceptions to global CLAUDE.md -->
 
 ---
 
@@ -81,7 +80,7 @@
 
 - `.env` and any secrets files
 - `migrations/` — database migrations are written manually
-- {{OTHER_OFF_LIMITS}}
+- <!-- TODO: add any other protected paths -->
 
 ---
 

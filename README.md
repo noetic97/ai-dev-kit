@@ -17,33 +17,72 @@ scripts/
   init.ts                    ← scaffolds a new project interactively
 ```
 
-## Setup (one time)
+## Quick start
 
-Copy the global base to your Claude home directory:
+### 1. One-time global setup
 
-```bash
-cp CLAUDE.md ~/.claude/CLAUDE.md
-```
-
-## Usage
-
-Run the init script from any new project directory:
+Deploy the global steering file and commands to `~/.claude/`:
 
 ```bash
-# From the project root
-bun <path-to-this-repo>/scripts/init.ts
-
-# Or if you add a shell alias (recommended):
-# alias ai-init="bun ~/repos/ai-dev-kit/scripts/init.ts"
-ai-init
+cd ~/path/to/ai-dev-kit
+bun run install-global
 ```
 
-The script will:
-1. Ask a few questions about the project
-2. Create `.claude/CLAUDE.md` pre-filled with your answers
-3. Copy slash commands into `.claude/commands/`
-4. Create `.claudeignore`
-5. Merge into existing files rather than overwrite
+Add a shell alias so you can run `init` from any directory (recommended):
+
+```bash
+# ~/.zshrc or ~/.bashrc
+alias ai-init="bun ~/path/to/ai-dev-kit/scripts/init.ts"
+```
+
+### 2. Start a new project
+
+```bash
+mkdir my-project && cd my-project
+bun init                # initialise Bun project
+ai-init                 # scaffold Claude steering files
+```
+
+The init script will prompt you to choose:
+- **Project type** — API / CLI / Frontend / Full-stack / Library
+- **Frontend framework** — React / Preact / Vue / Svelte / None *(full-stack & frontend only)*
+- **Backend framework** — Hono / Elysia / Express / None *(full-stack & API only)*
+- **Database** — PostgreSQL / SQLite / MySQL / None
+- **Test framework** — Bun test / Vitest / Jest / None
+
+Each prompt offers an **Other** option for free-text entry.
+
+It will create:
+```
+.claude/
+  CLAUDE.md       ← project steering file (pre-filled from your answers)
+  CONTEXT.md      ← living session context (never overwritten by re-runs)
+  commands/       ← slash commands copied from the kit
+.claudeignore
+```
+
+Files are never overwritten — re-running `ai-init` is always safe.
+
+### 3. Open a Claude session
+
+```bash
+claude
+```
+
+Suggested first prompt:
+
+> "Read `.claude/CLAUDE.md` and `.claude/CONTEXT.md` to orient yourself, then let's get started."
+
+### 4. Fill in the TODOs
+
+After init, open `.claude/CLAUDE.md` and fill in the placeholder sections:
+- Architecture description
+- Domain language / glossary
+- Key data models
+- External integrations
+- Security posture
+
+Update `.claude/CONTEXT.md` with your current focus before each session.
 
 ## Slash commands
 
@@ -54,6 +93,9 @@ Once scaffolded into a project, use these in any Claude Code session:
 | `/new-module` | Scaffold a new TypeScript module with types, logic, and tests |
 | `/adr` | Create an Architecture Decision Record |
 | `/code-review` | Review current git diff against project conventions |
+| `/security-review` | Security-focused review — input validation, secrets, injection, auth |
+| `/adversarial-review` | Adversarial re-review of code you just wrote — find the holes |
+| `/pr-description` | Generate a PR title and description from the full changeset |
 
 ## Extending for a project
 

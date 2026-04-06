@@ -84,9 +84,7 @@
 
 ---
 
-## Current Focus
+## Current Context
 
-<!-- Update this as the project evolves. Helps Claude prioritise context.
-  Example: "We are building the billing module. Auth is complete and stable." -->
-
-{{CURRENT_FOCUS}}
+See `.claude/CONTEXT.md` for current focus, active decisions, and known gotchas.
+Read that file at the start of every session before doing anything else.

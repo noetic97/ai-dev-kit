@@ -50,7 +50,11 @@ const writeNew = (path: string, content: string): FileAction => {
   return "created";
 };
 
-const appendIfMissing = (path: string, content: string, marker: string): FileAction => {
+const appendIfMissing = (
+  path: string,
+  content: string,
+  marker: string,
+): FileAction => {
   if (!existsSync(path)) return writeNew(path, content);
 
   const existing = readFileSync(path, "utf-8");
@@ -71,19 +75,30 @@ const fillTemplate = (template: string, answers: ProjectAnswers): string =>
     .replace(/\{\{DATABASE\}\}/g, answers.database || "none")
     .replace(/\{\{TEST_FRAMEWORK\}\}/g, answers.testFramework || "Bun test")
     .replace(/\{\{OTHER_DEPS\}\}/g, "TBD")
-    .replace(/\{\{ARCHITECTURE_DESCRIPTION\}\}/g, "<!-- TODO: describe your architecture -->")
+    .replace(
+      /\{\{ARCHITECTURE_DESCRIPTION\}\}/g,
+      "<!-- TODO: describe your architecture -->",
+    )
     .replace(/\{\{DOMAIN_GLOSSARY\}\}/g, "<!-- TODO: define domain terms -->")
     .replace(/\{\{KEY_TYPES\}\}/g, "<!-- TODO: paste key types here -->")
-    .replace(/\{\{INTEGRATIONS\}\}/g, "<!-- TODO: list external integrations -->")
-    .replace(/\{\{PROJECT_CONVENTIONS\}\}/g, "<!-- TODO: note any exceptions to global CLAUDE.md -->")
-    .replace(/\{\{OTHER_OFF_LIMITS\}\}/g, "<!-- TODO: add any other protected paths -->")
-    .replace(/\{\{CURRENT_FOCUS\}\}/g, "<!-- TODO: describe current work in progress -->");
+    .replace(
+      /\{\{INTEGRATIONS\}\}/g,
+      "<!-- TODO: list external integrations -->",
+    )
+    .replace(
+      /\{\{PROJECT_CONVENTIONS\}\}/g,
+      "<!-- TODO: note any exceptions to global CLAUDE.md -->",
+    )
+    .replace(
+      /\{\{OTHER_OFF_LIMITS\}\}/g,
+      "<!-- TODO: add any other protected paths -->",
+    );
 
 // ── Scaffold steps ────────────────────────────────────────────────────────────
 
 const scaffoldClaudeMd = (
   targetDir: string,
-  answers: ProjectAnswers
+  answers: ProjectAnswers,
 ): ScaffoldResult => {
   const claudeDir = join(targetDir, ".claude");
   if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
@@ -95,7 +110,7 @@ const scaffoldClaudeMd = (
   const action = appendIfMissing(
     destPath,
     filled,
-    "Claude Code — Project Steering File"
+    "Claude Code — Project Steering File",
   );
 
   return { path: destPath, action };
@@ -124,6 +139,30 @@ const scaffoldClaudeIgnore = (targetDir: string): ScaffoldResult => {
   return { path: destPath, action };
 };
 
+const scaffoldContextMd = (
+  targetDir: string,
+  answers: ProjectAnswers,
+): ScaffoldResult => {
+  const claudeDir = join(targetDir, ".claude");
+  if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
+
+  const destPath = join(claudeDir, "CONTEXT.md");
+
+  // Never overwrite — context is hand-maintained, never generated
+  if (existsSync(destPath)) return { path: destPath, action: "skipped" };
+
+  const template = readTemplate("templates/context.md");
+  const filled = template
+    .replace(/\{\{PROJECT_NAME\}\}/g, answers.projectName)
+    .replace(
+      /\{\{CURRENT_FOCUS\}\}/g,
+      "<!-- TODO: describe what you are actively working on -->",
+    );
+
+  writeFileSync(destPath, filled, "utf-8");
+  return { path: destPath, action: "created" };
+};
+
 // ── Output ────────────────────────────────────────────────────────────────────
 
 const printResult = (results: ScaffoldResult[]): void => {
@@ -144,8 +183,9 @@ Legend: ✓ created  ⊕ merged into existing  – already present, skipped
 
 Next steps:
   1. Fill in the TODOs in .claude/CLAUDE.md
-  2. Add your global base to ~/.claude/CLAUDE.md if not already there
-  3. Run \`claude\` in this directory to start a session
+  2. Update .claude/CONTEXT.md with your current focus
+  3. Add your global base to ~/.claude/CLAUDE.md if not already there
+  4. Run \`claude\` in this directory to start a session
 `);
 };
 
@@ -160,14 +200,21 @@ const main = async (): Promise<void> => {
   const answers: ProjectAnswers = {
     projectName: await prompt("Project name?", "my-project"),
     projectDescription: await prompt("One-line description?", ""),
-    projectType: await prompt("Project type? (API / CLI / full-stack / library)", "API"),
-    framework: await prompt("Framework? (Hono / Next.js / Elysia / none)", "none"),
+    projectType: await prompt(
+      "Project type? (API / CLI / full-stack / library)",
+      "API",
+    ),
+    framework: await prompt(
+      "Framework? (Hono / Next.js / Elysia / none)",
+      "none",
+    ),
     database: await prompt("Database? (PostgreSQL / SQLite / none)", "none"),
     testFramework: await prompt("Test framework?", "Bun test"),
   };
 
   const results: ScaffoldResult[] = [
     scaffoldClaudeMd(targetDir, answers),
+    scaffoldContextMd(targetDir, answers),
     scaffoldClaudeIgnore(targetDir),
     ...scaffoldCommands(targetDir),
   ];

@@ -2,7 +2,7 @@
 
 ## Role & Collaboration Model
 
-I am a lead developer, architect, and technical planner. Your role is implementation partner and ai-dev-kit.
+I am a lead developer, architect, and technical planner. Your role is implementation partner and quality analyst.
 
 **Default operating mode:**
 

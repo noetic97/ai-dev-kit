@@ -84,6 +84,15 @@
 
 ---
 
+## Security Posture
+
+- **Input trust boundary:** <!-- where does untrusted input enter the system? -->
+- **Auth mechanism:** <!-- JWT / session cookie / API key / none -->
+- **Secret management:** <!-- env vars / vault / none -->
+- Run `/security-review` before merging anything that touches auth, input handling, or external API calls.
+
+---
+
 ## Current Context
 
 See `.claude/CONTEXT.md` for current focus, active decisions, and known gotchas.

@@ -32,6 +32,36 @@ Do not list every file — describe the logical changes they represent.
 **Test plan** — a short checklist of what to verify before merging. Be specific to this
 changeset, not generic.
 
+## Create the PR
+
+After generating the description, output a ready-to-run command block.
+
+First, get the current branch name:
+
+```bash
+git branch --show-current
+```
+
+Then output:
+
+```bash
+# Push branch if not already on remote
+git push -u origin <current-branch>
+
+# Create PR (Gitea via tea CLI)
+tea pr create \
+  --title "<generated title>" \
+  --description "<generated body>" \
+  --base main \
+  --head <current-branch>
+
+# Alternatively, if pushing to GitHub mirror:
+# gh pr create --title "<generated title>" --body "<generated body>" --base main --head <current-branch>
+```
+
+Substitute the actual title, description, and branch name — do not output literal placeholders.
+The description should be the full markdown body (summary + changed files + test plan) formatted for the CLI argument.
+
 ## Rules
 
 - Read the full diff before writing anything — do not summarise from filenames alone

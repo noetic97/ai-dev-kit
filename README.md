@@ -104,7 +104,7 @@ Commands available after running `ai-init` in a project (`/` to see them in the 
 |---|---|
 | `/new-module` | Scaffold a new TypeScript module with types, logic, and tests |
 | `/adr` | Create an Architecture Decision Record |
-| `/code-review` | Review current git diff against project conventions |
+| `/code-review` | Thorough code review on specified files or the current diff |
 | `/security-review` | Security-focused review — input validation, secrets, injection, auth |
 | `/adversarial-review` | Adversarial re-review of code you just wrote — find the holes |
 | `/pr-description` | Generate a PR title and description from the full changeset |
@@ -114,6 +114,7 @@ Commands available after running `ai-init` in a project (`/` to see them in the 
 | `/commit` | Stage files and commit with a conventional commit message |
 | `/update-context` | Refresh `.claude/CONTEXT.md` with current project state |
 | `/changelog` | Generate a CHANGELOG entry from recent git history |
+| `/fix-review-issues` | Work through findings from a code or adversarial review, one fix at a time |
 
 ### Toolkit-only commands
 

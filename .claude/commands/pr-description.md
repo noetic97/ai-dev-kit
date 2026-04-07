@@ -7,11 +7,21 @@ Generate a pull request title and description from the current changeset.
 Run the following to get the full picture before writing anything:
 
 ```bash
-git log main...HEAD --oneline
-git diff main...HEAD
+# Detect base branch, remote, and repo slug
+git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null | sed 's|origin/||'
+git branch --show-current
+git config branch.$(git branch --show-current).remote
+git remote get-url $(git config branch.$(git branch --show-current).remote 2>/dev/null || echo origin)
+
+git log $(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null || echo origin/main)...HEAD --oneline
+git diff $(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null || echo origin/main)...HEAD
 ```
 
-If there is no `main` branch, use `git log --oneline` and `git diff HEAD~1` instead.
+From `git remote get-url`, extract the repo slug (`owner/repo`) by stripping the host prefix and `.git` suffix.
+For SSH aliases like `gitea-noetic97:noetic97/ai-dev-kit.git`, the slug is everything after the first `:` minus `.git`.
+For HTTPS URLs like `https://github.com/owner/repo.git`, take the last two path segments minus `.git`.
+
+Use the detected base branch, remote, and repo slug throughout. Fall back to `main`, `origin`, and omitting `--repo` if detection fails.
 
 Read **every changed file** in the diff — not just source code. Documentation, config,
 templates, and command files all count. A missing entry in README.md or a new file not
@@ -31,6 +41,55 @@ Do not list every file — describe the logical changes they represent.
 
 **Test plan** — a short checklist of what to verify before merging. Be specific to this
 changeset, not generic.
+
+## Create the PR
+
+After generating the description, detect whether a PR already exists for this branch,
+then output the appropriate ready-to-run command block.
+
+```bash
+# Check for an existing PR on this branch
+tea pr list --repo <owner/repo> --output json 2>/dev/null
+```
+
+Parse the JSON for an entry whose `head.ref` matches the current branch. If found, note the PR number.
+
+Write the description body to a temp file to avoid shell escaping issues with markdown content:
+
+```bash
+cat > /tmp/pr-body.md <<'PRBODY'
+<generated body>
+PRBODY
+```
+
+Then output the push step plus the appropriate command:
+
+```bash
+# Push commits (skips if branch already on remote)
+git ls-remote --exit-code <remote> <current-branch> \
+  && echo "branch already on remote" \
+  || git push -u <remote> <current-branch>
+
+# If PR exists — update via Gitea API (tea pr edit does not exist):
+tea api -X PATCH repos/<owner/repo>/pulls/<pr-number> \
+  -f title="<generated title>" \
+  -F body=@/tmp/pr-body.md
+
+# If no PR exists — create it:
+tea pr create \
+  --repo <owner/repo> \
+  --title "<generated title>" \
+  --description "$(cat /tmp/pr-body.md)" \
+  --base <detected-base-branch> \
+  --head <current-branch>
+
+# GitHub mirror alternative (gh CLI):
+# gh pr edit <pr-number> --repo <owner/repo> --title "<title>" --body "$(cat /tmp/pr-body.md)"
+# gh pr create --repo <owner/repo> --title "<title>" --body "$(cat /tmp/pr-body.md)" \
+#   --base <detected-base-branch> --head <current-branch>
+```
+
+Output only the relevant block (update OR create) — not both. Never output `<placeholder>` text literally.
 
 ## Rules
 

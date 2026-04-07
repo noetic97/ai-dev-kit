@@ -49,14 +49,20 @@ then output the appropriate ready-to-run command block.
 
 ```bash
 # Check for an existing PR on this branch
-tea pr list --repo <owner/repo> --head <current-branch> --output json 2>/dev/null
+tea pr list --repo <owner/repo> --output json 2>/dev/null
 ```
 
-If a PR exists, output an **edit** command using the PR number from the list output.
-If no PR exists, output a **create** command.
+Parse the JSON for an entry whose `head.ref` matches the current branch. If found, note the PR number.
 
-Use a heredoc for the description body to avoid escaping issues with backticks, quotes,
-and special characters in markdown content:
+Write the description body to a temp file to avoid shell escaping issues with markdown content:
+
+```bash
+cat > /tmp/pr-body.md <<'PRBODY'
+<generated body>
+PRBODY
+```
+
+Then output the push step plus the appropriate command:
 
 ```bash
 # Push commits (skips if branch already on remote)
@@ -64,38 +70,26 @@ git ls-remote --exit-code <remote> <current-branch> \
   && echo "branch already on remote" \
   || git push -u <remote> <current-branch>
 
-# If PR exists — update it:
-tea pr edit <pr-number> \
-  --repo <owner/repo> \
-  --title "<generated title>" \
-  --description "$(cat <<'PRBODY'
-<generated body>
-PRBODY
-)"
+# If PR exists — update via Gitea API (tea pr edit does not exist):
+tea api -X PATCH repos/<owner/repo>/pulls/<pr-number> \
+  -f title="<generated title>" \
+  -F body=@/tmp/pr-body.md
 
 # If no PR exists — create it:
 tea pr create \
   --repo <owner/repo> \
   --title "<generated title>" \
-  --description "$(cat <<'PRBODY'
-<generated body>
-PRBODY
-)" \
+  --description "$(cat /tmp/pr-body.md)" \
   --base <detected-base-branch> \
   --head <current-branch>
 
 # GitHub mirror alternative (gh CLI):
-# gh pr edit --repo <owner/repo> --title "<title>" --body "$(cat <<'PRBODY'
-# <body>
-# PRBODY
-# )"
-# gh pr create --repo <owner/repo> --title "<title>" --body "$(cat <<'PRBODY'
-# <body>
-# PRBODY
-# )" --base <detected-base-branch> --head <current-branch>
+# gh pr edit <pr-number> --repo <owner/repo> --title "<title>" --body "$(cat /tmp/pr-body.md)"
+# gh pr create --repo <owner/repo> --title "<title>" --body "$(cat /tmp/pr-body.md)" \
+#   --base <detected-base-branch> --head <current-branch>
 ```
 
-Output only the relevant block (edit OR create) — not both. Never output `<placeholder>` text literally.
+Output only the relevant block (update OR create) — not both. Never output `<placeholder>` text literally.
 
 ## Rules
 

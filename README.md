@@ -5,16 +5,18 @@ Personal Claude Code toolkit. Steering files, slash commands, and project scaffo
 ## What's inside
 
 ```
-CLAUDE.md                    ← global base steering file → copy to ~/.claude/CLAUDE.md
+CLAUDE.md                    ← global base steering file → deployed to ~/.claude/CLAUDE.md
 templates/
-  project-claude.md          ← project-level CLAUDE.md template (filled by init script)
+  project-claude.md          ← project-level CLAUDE.md template (filled by init)
+  context.md                 ← CONTEXT.md template (living session context)
   claudeignore               ← base .claudeignore
 commands/
-  new-module.md              ← /new-module  scaffold a new TS module
-  adr.md                     ← /adr         create an Architecture Decision Record
-  code-review.md             ← /code-review review current changes
+  *.md                       ← slash commands (deployed to projects via init)
+  toolkit/
+    *.md                     ← toolkit-only commands (deployed to ~/.claude only)
 scripts/
   init.ts                    ← scaffolds a new project interactively
+  install-global.ts          ← deploys CLAUDE.md + commands to ~/.claude/
 ```
 
 ## Quick start
@@ -86,7 +88,17 @@ Update `.claude/CONTEXT.md` with your current focus before each session.
 
 ## Slash commands
 
-Once scaffolded into a project, use these in any Claude Code session:
+Slash commands are typed inside a **Claude Code chat session** — not in the terminal.
+
+```bash
+# Start a session first
+claude
+
+# Then type a command in the chat input
+/code-review
+```
+
+Commands available after running `ai-init` in a project (`/` to see them in the chat input):
 
 | Command | Purpose |
 |---|---|
@@ -96,6 +108,20 @@ Once scaffolded into a project, use these in any Claude Code session:
 | `/security-review` | Security-focused review — input validation, secrets, injection, auth |
 | `/adversarial-review` | Adversarial re-review of code you just wrote — find the holes |
 | `/pr-description` | Generate a PR title and description from the full changeset |
+| `/new-feature` | Spec-driven feature implementation — discovery, spec approval, then build |
+| `/bug-hunter` | Systematic bug investigation — instrument first, fix with log evidence |
+| `/implement-and-ship` | Orchestrate the full flow: scaffold → review → fix → commit |
+| `/commit` | Stage files and commit with a conventional commit message |
+| `/update-context` | Refresh `.claude/CONTEXT.md` with current project state |
+| `/changelog` | Generate a CHANGELOG entry from recent git history |
+
+### Toolkit-only commands
+
+These are deployed to `~/.claude/commands/` by `install-global` but are **not** copied to projects by `init` — they are specific to working in this repo.
+
+| Command | Purpose |
+|---|---|
+| `/sync-docs` | Verify the README slash commands table matches the actual commands in `commands/` |
 
 ## Extending for a project
 

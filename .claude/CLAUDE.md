@@ -67,10 +67,7 @@
 
 ## Conventions & Exceptions
 
-<!-- Any project-specific deviations from the global CLAUDE.md.
-  Example: "This project uses classes for database models due to the ORM." -->
-
-<!-- TODO: note any exceptions to global CLAUDE.md -->
+- `commands/` at the repo root is the source of truth for all slash commands. `.claude/commands/` is a deployed copy produced by `init` — never edit files there directly. Changes to commands belong in `commands/` (or `commands/toolkit/` for toolkit-only commands).
 
 ---
 

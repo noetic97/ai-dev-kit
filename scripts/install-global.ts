@@ -57,13 +57,10 @@ const installClaudeMd = (): InstallResult => {
   return { path: dest, action };
 };
 
-const installCommands = (): InstallResult[] => {
-  const srcDir = join(kitRoot, "commands");
-  const destDir = join(claudeHome, "commands");
-
+const installCommandsFromDir = (srcDir: string, destDir: string): InstallResult[] => {
+  if (!existsSync(srcDir)) return [];
   if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
 
-  // Discover all .md files rather than maintaining a static list
   const files = readdirSync(srcDir).filter((f) => f.endsWith(".md"));
 
   return files.map((file) => {
@@ -76,6 +73,30 @@ const installCommands = (): InstallResult[] => {
     writeFileSync(dest, content, "utf-8");
     return { path: dest, action: "created" };
   });
+};
+
+const installCommands = (): InstallResult[] => {
+  const destDir = join(claudeHome, "commands");
+  const universalDir = join(kitRoot, "commands");
+  const toolkitDir = join(kitRoot, "commands", "toolkit");
+
+  // Warn if any toolkit command shares a filename with a universal command —
+  // the universal copy would win silently since it deploys first.
+  if (existsSync(toolkitDir) && existsSync(universalDir)) {
+    const universal = new Set(readdirSync(universalDir).filter((f) => f.endsWith(".md")));
+    const collisions = readdirSync(toolkitDir)
+      .filter((f) => f.endsWith(".md") && universal.has(f));
+    if (collisions.length > 0) {
+      console.warn(`\nWarning: toolkit commands shadow universal commands and will be skipped: ${collisions.join(", ")}\n`);
+    }
+  }
+
+  return [
+    // Project-universal commands
+    ...installCommandsFromDir(universalDir, destDir),
+    // Toolkit-only commands — deployed to ~/.claude/commands/ but not to projects via init
+    ...installCommandsFromDir(toolkitDir, destDir),
+  ];
 };
 
 // ── Output ────────────────────────────────────────────────────────────────────

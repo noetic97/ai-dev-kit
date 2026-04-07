@@ -7,11 +7,16 @@ Generate a pull request title and description from the current changeset.
 Run the following to get the full picture before writing anything:
 
 ```bash
-git log main...HEAD --oneline
-git diff main...HEAD
+# Detect base branch and remote
+git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null | sed 's|origin/||'
+git branch --show-current
+git config branch.$(git branch --show-current).remote
+
+git log $(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null || echo origin/main)...HEAD --oneline
+git diff $(git symbolic-ref refs/remotes/origin/HEAD --short 2>/dev/null || echo origin/main)...HEAD
 ```
 
-If there is no `main` branch, use `git log --oneline` and `git diff HEAD~1` instead.
+Use the detected base branch and remote throughout. Fall back to `main` and `origin` if detection fails.
 
 Read **every changed file** in the diff — not just source code. Documentation, config,
 templates, and command files all count. A missing entry in README.md or a new file not
@@ -34,33 +39,34 @@ changeset, not generic.
 
 ## Create the PR
 
-After generating the description, output a ready-to-run command block.
+After generating the description, output a ready-to-run command block using the detected
+branch, remote, and base branch from the Instructions step.
 
-First, get the current branch name:
-
-```bash
-git branch --show-current
-```
-
-Then output:
+Use a heredoc for the description body to avoid escaping issues with backticks, quotes,
+and special characters in markdown content:
 
 ```bash
-# Push branch if not already on remote
-git push -u origin <current-branch>
+# Only push if branch is not already on the remote
+git ls-remote --exit-code <remote> <current-branch> || git push -u <remote> <current-branch>
 
 # Create PR (Gitea via tea CLI)
 tea pr create \
   --title "<generated title>" \
-  --description "<generated body>" \
-  --base main \
+  --description "$(cat <<'PRBODY'
+<generated body — paste full markdown here>
+PRBODY
+)" \
+  --base <detected-base-branch> \
   --head <current-branch>
 
 # Alternatively, if pushing to GitHub mirror:
-# gh pr create --title "<generated title>" --body "<generated body>" --base main --head <current-branch>
+# gh pr create --title "<generated title>" --body "$(cat <<'PRBODY'
+# <generated body>
+# PRBODY
+# )" --base <detected-base-branch> --head <current-branch>
 ```
 
-Substitute the actual title, description, and branch name — do not output literal placeholders.
-The description should be the full markdown body (summary + changed files + test plan) formatted for the CLI argument.
+Substitute all placeholders with actual values. Never output `<placeholder>` text literally.
 
 ## Rules
 

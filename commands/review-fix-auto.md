@@ -1,6 +1,8 @@
-# /review-implementer
+# /review-fix-auto
 
-Autonomously implement findings from the most recent code review, re-run the review, and loop until clean or 3 passes are exhausted.
+Autonomously implement findings from the most recent code or adversarial review, re-run the review, and loop until clean or 3 passes are exhausted.
+
+> **Autonomous mode.** For manual step-by-step fixing with confirmations, use `/review-fix` instead.
 
 ## Instructions
 

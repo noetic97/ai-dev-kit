@@ -19,32 +19,17 @@ Follow the `/new-module` workflow:
 
 ---
 
-## Phase 2 — Review (round 1)
+## Phase 2 — Review and fix
 
-Without being prompted, run both reviews back to back:
+Run `/full-review` on the newly scaffolded module. It will handle the complete cycle:
+code review → fix loop → adversarial review → fix loop, up to 3 passes each.
 
-1. `/code-review` — evaluate against correctness, FP conventions, TypeScript quality, tests, readability, and architecture
-2. `/adversarial-review` — switch roles and find what's wrong: edge cases, logic errors, test gaps, security holes
-
-Compile a combined fix list. Separate **blocking** (must fix before shipping) from **non-blocking** (worth noting but won't hold the commit).
-
----
-
-## Phase 3 — Fix
-
-Apply all blocking fixes from Phase 2. For each fix, state what you changed and why.
+If `/full-review` exhausts its passes with issues remaining, stop here and surface the
+outstanding findings to the user before proceeding.
 
 ---
 
-## Phase 4 — Review (round 2)
-
-Repeat Phase 2. If no new blocking issues are found, proceed. If blocking issues remain, apply fixes and note that a third round was needed — this is a signal the original implementation needed more thought.
-
-Cap at 2 fix rounds. If blocking issues persist after round 2, stop and surface them to the user rather than committing.
-
----
-
-## Phase 5 — Ship
+## Phase 3 — Ship
 
 1. Run `/pr-description` to generate the PR title and description
 2. Run `/commit` to stage and commit with a conventional commit message

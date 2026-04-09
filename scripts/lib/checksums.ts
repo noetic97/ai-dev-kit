@@ -8,10 +8,17 @@ export type Checksums = Readonly<Record<string, string>>;
 export const computeHash = (content: string): string =>
   createHash("sha256").update(content, "utf-8").digest("hex");
 
+const isChecksums = (value: unknown): value is Checksums =>
+  typeof value === "object" &&
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.values(value as Record<string, unknown>).every((v) => typeof v === "string");
+
 export const readChecksums = (path: string): Checksums => {
   if (!existsSync(path)) return {};
   try {
-    return JSON.parse(readFileSync(path, "utf-8")) as Checksums;
+    const parsed: unknown = JSON.parse(readFileSync(path, "utf-8"));
+    return isChecksums(parsed) ? parsed : {};
   } catch {
     return {};
   }

@@ -56,7 +56,13 @@ const select = async (
   const defaultIndex = defaultValue
     ? options.findIndex((o) => o.value === defaultValue)
     : -1;
-  const defaultChoice = defaultIndex >= 0 ? String(defaultIndex + 1) : "1";
+  // If the existing value is a custom string not in the options list, default to "Other"
+  const isCustomDefault = defaultValue !== undefined && defaultValue !== "" && defaultIndex === -1;
+  const defaultChoice = defaultIndex >= 0
+    ? String(defaultIndex + 1)
+    : isCustomDefault
+    ? String(options.length + 1)
+    : "1";
 
   console.log(`\n${question}`);
   options.forEach(({ label, value }, i) => {

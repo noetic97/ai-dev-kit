@@ -54,11 +54,12 @@ const appendIfMissing = (
   return "merged";
 };
 
-// Returns the content string to checksum — the source content for created/merged files.
-// For skipped files we read the existing content so the checksum reflects what's on disk.
+// Returns the content to checksum — always what's actually on disk after install.
+// "created" is the only case where we wrote exactly srcContent; "merged" and "skipped"
+// both result in files that differ from srcContent so we read them back.
 const contentToChecksum = (path: string, srcContent: string, action: FileAction): string => {
-  if (action === "skipped") return readFileSync(path, "utf-8");
-  return srcContent;
+  if (action === "created") return srcContent;
+  return readFileSync(path, "utf-8");
 };
 
 // ── Install steps ─────────────────────────────────────────────────────────────
@@ -82,10 +83,10 @@ const installCommandsFromDir = (srcDir: string, destDir: string): InstallResult[
     const content = readFileSync(join(srcDir, file), "utf-8");
 
     // Never overwrite — preserve any hand-edits in ~/.claude/commands/
-    if (existsSync(dest)) return { path: dest, action: "skipped" as FileAction, content: contentToChecksum(dest, content, "skipped") };
+    if (existsSync(dest)) return { path: dest, action: "skipped", content: contentToChecksum(dest, content, "skipped") };
 
     writeFileSync(dest, content, "utf-8");
-    return { path: dest, action: "created" as FileAction, content };
+    return { path: dest, action: "created", content };
   });
 };
 

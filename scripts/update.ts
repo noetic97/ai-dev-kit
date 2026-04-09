@@ -15,7 +15,7 @@
  *       no stored hash (unknown state) → treat as locally modified → write .kit-update, warn
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 import { homedir } from "os";
 import { type Checksums, computeHash, readChecksums, withHash, writeChecksums } from "./lib/checksums";
@@ -56,8 +56,10 @@ const updateFile = (
   const installedContent = readFileSync(destPath, "utf-8");
   const installedHash = computeHash(installedContent);
 
-  // Already up to date
+  // Already up to date — clean up any stale .kit-update from a previously resolved conflict
   if (installedHash === srcHash) {
+    const kitUpdatePath = `${destPath}.kit-update`;
+    if (existsSync(kitUpdatePath)) unlinkSync(kitUpdatePath);
     return {
       result: { path: destPath, action: "current" },
       checksums: withHash(checksums, destPath, srcContent),
@@ -109,10 +111,42 @@ const updateFilesFromDir = (
   );
 };
 
+// CLAUDE.md is deployed via appendIfMissing — the installed file may contain user
+// content prepended to the kit section. Never auto-overwrite. Instead check whether
+// the installed file already contains the current kit source as a substring (current),
+// or write .kit-update for manual review (conflict).
 const updateClaudeMd = (checksums: Checksums): { result: UpdateResult; checksums: Checksums } => {
   const src = join(kitRoot, "CLAUDE.md");
   const dest = join(claudeHome, "CLAUDE.md");
-  return updateFile(src, dest, checksums);
+  const srcContent = readFileSync(src, "utf-8");
+
+  if (!existsSync(dest)) {
+    writeFileSync(dest, srcContent, "utf-8");
+    return {
+      result: { path: dest, action: "created" },
+      checksums: withHash(checksums, dest, srcContent),
+    };
+  }
+
+  const installedContent = readFileSync(dest, "utf-8");
+
+  // Kit section is present and current — nothing to do
+  if (installedContent.includes(srcContent)) {
+    const kitUpdatePath = `${dest}.kit-update`;
+    if (existsSync(kitUpdatePath)) unlinkSync(kitUpdatePath);
+    return {
+      result: { path: dest, action: "current" },
+      checksums: withHash(checksums, dest, installedContent),
+    };
+  }
+
+  // Kit source has changed — write .kit-update for manual merge.
+  // We never auto-overwrite CLAUDE.md since the installed copy may have a user prefix.
+  writeFileSync(`${dest}.kit-update`, srcContent, "utf-8");
+  return {
+    result: { path: dest, action: "conflict" },
+    checksums,
+  };
 };
 
 const updateCommands = (
@@ -121,6 +155,16 @@ const updateCommands = (
   const destDir = join(claudeHome, "commands");
   const universalDir = join(kitRoot, "commands");
   const toolkitDir = join(kitRoot, "commands", "toolkit");
+
+  // Warn if a toolkit command shares a filename with a universal command —
+  // the universal copy deploys first so the toolkit version would silently overwrite it.
+  if (existsSync(toolkitDir) && existsSync(universalDir)) {
+    const universal = new Set(readdirSync(universalDir).filter((f) => f.endsWith(".md")));
+    const collisions = readdirSync(toolkitDir).filter((f) => f.endsWith(".md") && universal.has(f));
+    if (collisions.length > 0) {
+      console.warn(`\nWarning: toolkit commands shadow universal commands and will be skipped: ${collisions.join(", ")}\n`);
+    }
+  }
 
   const universal = updateFilesFromDir(universalDir, destDir, checksums);
   const toolkit = updateFilesFromDir(toolkitDir, destDir, universal.checksums);

@@ -1,5 +1,9 @@
 import { createHash } from "crypto";
 import { existsSync, readFileSync, writeFileSync } from "fs";
+import { join } from "path";
+import { homedir } from "os";
+
+export const checksumsPath = join(homedir(), ".claude", ".kit-checksums");
 
 // Maps absolute dest path → SHA256 of the content as originally installed by the kit.
 // Used to distinguish "never touched" files (safe to auto-update) from locally modified ones.

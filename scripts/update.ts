@@ -18,7 +18,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 import { homedir } from "os";
-import { type Checksums, computeHash, readChecksums, withHash, writeChecksums } from "./lib/checksums";
+import { checksumsPath, type Checksums, computeHash, readChecksums, withHash, writeChecksums } from "./lib/checksums";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -33,7 +33,6 @@ type UpdateResult = {
 
 const kitRoot = resolve(import.meta.dir, "..");
 const claudeHome = join(homedir(), ".claude");
-const checksumsPath = join(claudeHome, ".kit-checksums");
 
 // ── Core logic ────────────────────────────────────────────────────────────────
 
@@ -92,11 +91,12 @@ const updateFilesFromDir = (
   srcDir: string,
   destDir: string,
   checksums: Checksums,
+  exclude: ReadonlySet<string> = new Set(),
 ): { results: UpdateResult[]; checksums: Checksums } => {
   if (!existsSync(srcDir)) return { results: [], checksums };
   if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
 
-  const files = readdirSync(srcDir).filter((f) => f.endsWith(".md"));
+  const files = readdirSync(srcDir).filter((f) => f.endsWith(".md") && !exclude.has(f));
 
   return files.reduce<{ results: UpdateResult[]; checksums: Checksums }>(
     (acc, file) => {
@@ -130,8 +130,12 @@ const updateClaudeMd = (checksums: Checksums): { result: UpdateResult; checksums
 
   const installedContent = readFileSync(dest, "utf-8");
 
+  // Normalize line endings before comparison — installed file may have CRLF
+  // (Windows git config, editor auto-conversion) while source always has LF.
+  const normalize = (s: string): string => s.replace(/\r\n/g, "\n");
+
   // Kit section is present and current — nothing to do
-  if (installedContent.includes(srcContent)) {
+  if (normalize(installedContent).includes(normalize(srcContent))) {
     const kitUpdatePath = `${dest}.kit-update`;
     if (existsSync(kitUpdatePath)) unlinkSync(kitUpdatePath);
     return {
@@ -156,18 +160,20 @@ const updateCommands = (
   const universalDir = join(kitRoot, "commands");
   const toolkitDir = join(kitRoot, "commands", "toolkit");
 
-  // Warn if a toolkit command shares a filename with a universal command —
-  // the universal copy deploys first so the toolkit version would silently overwrite it.
-  if (existsSync(toolkitDir) && existsSync(universalDir)) {
-    const universal = new Set(readdirSync(universalDir).filter((f) => f.endsWith(".md")));
-    const collisions = readdirSync(toolkitDir).filter((f) => f.endsWith(".md") && universal.has(f));
-    if (collisions.length > 0) {
-      console.warn(`\nWarning: toolkit commands shadow universal commands and will be skipped: ${collisions.join(", ")}\n`);
-    }
+  const universalFiles = existsSync(universalDir)
+    ? new Set(readdirSync(universalDir).filter((f) => f.endsWith(".md")))
+    : new Set<string>();
+
+  const collisions = existsSync(toolkitDir)
+    ? new Set(readdirSync(toolkitDir).filter((f) => f.endsWith(".md") && universalFiles.has(f)))
+    : new Set<string>();
+
+  if (collisions.size > 0) {
+    console.warn(`\nWarning: toolkit commands share filenames with universal commands and will be skipped: ${[...collisions].join(", ")}\n`);
   }
 
   const universal = updateFilesFromDir(universalDir, destDir, checksums);
-  const toolkit = updateFilesFromDir(toolkitDir, destDir, universal.checksums);
+  const toolkit = updateFilesFromDir(toolkitDir, destDir, universal.checksums, collisions);
 
   return {
     results: [...universal.results, ...toolkit.results],

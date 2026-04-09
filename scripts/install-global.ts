@@ -15,7 +15,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 import { homedir } from "os";
-import { type Checksums, computeHash, readChecksums, withHash, writeChecksums } from "./lib/checksums";
+import { checksumsPath, type Checksums, computeHash, readChecksums, withHash, writeChecksums } from "./lib/checksums";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,7 +31,6 @@ type InstallResult = {
 
 const kitRoot = resolve(import.meta.dir, "..");
 const claudeHome = join(homedir(), ".claude");
-const checksumsPath = join(claudeHome, ".kit-checksums");
 
 // ── File strategies ───────────────────────────────────────────────────────────
 

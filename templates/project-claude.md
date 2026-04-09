@@ -83,6 +83,10 @@
 - `migrations/` — database migrations are written manually
 - {{OTHER_OFF_LIMITS}}
 
+## AI Session Discipline
+
+- Don't batch unrelated concerns into a single session. Review and fix loops (`/full-review`, `/review-implementer`) degrade in quality proportionally with diff size. Keep changes focused to one logical concern per session — prefer small, reviewable commits over large sweeping changes.
+
 ---
 
 ## Security Posture

@@ -114,6 +114,7 @@ This is non-negotiable. I refactor OOP into functional patterns. Follow this in 
 - No TODO comments without a corresponding explanation
 - Don't generate boilerplate I didn't ask for (extra files, scaffolding, config)
 - Don't apologize or pad responses — be direct
+- Don't batch unrelated concerns into a single AI-driven session. Review and fix loops (`/full-review`, `/review-implementer`) degrade in quality proportionally with diff size. Keep changes focused to one logical concern per session — prefer small, reviewable commits over large sweeping changes.
 
 ---
 

@@ -114,8 +114,8 @@ Commands available after running `ai-init` in a project (`/` to see them in the 
 | `/commit` | Stage files and commit with a conventional commit message |
 | `/update-context` | Refresh `.claude/CONTEXT.md` with current project state |
 | `/changelog` | Generate a CHANGELOG entry from recent git history |
-| `/fix-review-issues` | Work through findings from a code or adversarial review, one fix at a time |
-| `/review-implementer` | Autonomously implement review findings, re-run the review, and loop until clean (max 3 passes) |
+| `/review-fix` | Work through review findings interactively, one fix at a time (manual mode) |
+| `/review-fix-auto` | Autonomously implement review findings, re-run the review, and loop until clean (max 3 passes) |
 | `/full-review` | Complete review-and-fix cycle: code review → fix loop → adversarial review → fix loop |
 
 ### Toolkit-only commands

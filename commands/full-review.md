@@ -30,9 +30,9 @@ Wait for confirmation before continuing. If the user overrides, note that findin
 Run `/code-review` on the specified scope.
 
 **If Must Fix or Should Fix findings are present:**
-> Passing findings to `/review-implementer` — pass 1 of 3.
+> Passing findings to `/review-fix-auto` — pass 1 of 3.
 
-Invoke `/review-implementer`. It will implement fixes, re-run code review, and loop up to 3 times.
+Invoke `/review-fix-auto`. It will implement fixes, re-run code review, and loop up to 3 times.
 
 - If it resolves all Must Fix / Should Fix items → proceed to Step 3.
 - If it exhausts 3 passes with issues remaining → stop. Present the outstanding findings and ask the user how to proceed. Do not continue to adversarial review.
@@ -46,9 +46,9 @@ Invoke `/review-implementer`. It will implement fixes, re-run code review, and l
 Run `/adversarial-review` on the same scope.
 
 **If Critical or Should Fix findings are present:**
-> Passing findings to `/review-implementer` — pass 1 of 3.
+> Passing findings to `/review-fix-auto` — pass 1 of 3.
 
-Invoke `/review-implementer`. Same loop rules as Step 2.
+Invoke `/review-fix-auto`. Same loop rules as Step 2.
 
 - If it resolves all Critical / Should Fix items → proceed to Step 4.
 - If it exhausts 3 passes with issues remaining → stop and surface to user.
@@ -72,5 +72,5 @@ Report a summary:
 
 - Pass the same scope argument through to all review and implementer invocations
 - Do not proceed to adversarial review if code review has unresolved Must Fix items
-- Consider findings from either review go to `BACKLOG.md`, not to `/review-implementer`
+- Consider findings from either review go to `BACKLOG.md`, not to `/review-fix-auto`
 - This command is a sequencer — do not add review logic here; delegate to the review commands

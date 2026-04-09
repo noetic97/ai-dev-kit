@@ -1,6 +1,8 @@
-# /fix-review-issues
+# /review-fix
 
-Work through a list of issues from a prior code or adversarial review, one at a time.
+Work through findings from a code or adversarial review interactively, one fix at a time.
+
+> **Manual mode.** For autonomous fix-and-recheck looping, use `/review-fix-auto` instead.
 
 ## Instructions
 

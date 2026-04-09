@@ -45,7 +45,11 @@ Run `git diff` to see what changed if needed.
 
 Be direct. Do not soften findings.
 
-**The Weakest Parts** — ranked list, most serious first. For each: what it is, why it matters, what breaks if left unfixed.
+**Critical** — would cause data loss, security breach, or silent incorrect behavior in production. Block merge. For each: what it is, why it matters, what breaks if left unfixed.
+
+**Should Fix** — real problem that will cause pain; worth addressing before merge. Same format.
+
+**Consider** — architectural concern or accumulating debt. Do not fix now; these belong in the backlog. Note why it matters long-term.
 
 **Test Gaps** — what is not covered and should be.
 

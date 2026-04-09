@@ -6,3 +6,6 @@ dist/
 !.env.example
 *.tsbuildinfo
 .DS_Store
+
+# Deployed command copies — derived from commands/, populated by init/install-global
+.claude/commands/

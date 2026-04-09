@@ -6,11 +6,16 @@
  * Deploys CLAUDE.md and commands/ to ~/.claude/.
  * Merge strategy: appends to existing files rather than overwriting.
  * Commands are never overwritten so hand-edits in ~/.claude/commands/ are safe.
+ *
+ * Records SHA256 checksums of every deployed file in ~/.claude/.kit-checksums
+ * so that `scripts/update.ts` can later distinguish unmodified files (safe to
+ * auto-update) from locally modified ones (write .kit-update copy instead).
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 import { homedir } from "os";
+import { checksumsPath, type Checksums, computeHash, readChecksums, withHash, writeChecksums } from "./lib/checksums";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -19,6 +24,7 @@ type FileAction = "created" | "merged" | "skipped";
 type InstallResult = {
   path: string;
   action: FileAction;
+  content: string; // retained so we can checksum what was actually written
 };
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -47,6 +53,14 @@ const appendIfMissing = (
   return "merged";
 };
 
+// Returns the content to checksum — always what's actually on disk after install.
+// "created" is the only case where we wrote exactly srcContent; "merged" and "skipped"
+// both result in files that differ from srcContent so we read them back.
+const contentToChecksum = (path: string, srcContent: string, action: FileAction): string => {
+  if (action === "created") return srcContent;
+  return readFileSync(path, "utf-8");
+};
+
 // ── Install steps ─────────────────────────────────────────────────────────────
 
 const installClaudeMd = (): InstallResult => {
@@ -54,7 +68,7 @@ const installClaudeMd = (): InstallResult => {
   const dest = join(claudeHome, "CLAUDE.md");
   const content = readFileSync(src, "utf-8");
   const action = appendIfMissing(dest, content, "Claude Code — Global Steering File");
-  return { path: dest, action };
+  return { path: dest, action, content: contentToChecksum(dest, content, action) };
 };
 
 const installCommandsFromDir = (srcDir: string, destDir: string): InstallResult[] => {
@@ -65,13 +79,13 @@ const installCommandsFromDir = (srcDir: string, destDir: string): InstallResult[
 
   return files.map((file) => {
     const dest = join(destDir, file);
+    const content = readFileSync(join(srcDir, file), "utf-8");
 
     // Never overwrite — preserve any hand-edits in ~/.claude/commands/
-    if (existsSync(dest)) return { path: dest, action: "skipped" };
+    if (existsSync(dest)) return { path: dest, action: "skipped", content: contentToChecksum(dest, content, "skipped") };
 
-    const content = readFileSync(join(srcDir, file), "utf-8");
     writeFileSync(dest, content, "utf-8");
-    return { path: dest, action: "created" };
+    return { path: dest, action: "created", content };
   });
 };
 
@@ -118,6 +132,15 @@ Legend: ✓ created  ⊕ merged into existing  – already present, skipped
 `);
 };
 
+const recordChecksums = (results: InstallResult[]): void => {
+  const existing = readChecksums(checksumsPath);
+  const updated = results.reduce<Checksums>(
+    (acc, { path, content }) => withHash(acc, path, content),
+    existing,
+  );
+  writeChecksums(checksumsPath, updated);
+};
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 const main = (): void => {
@@ -132,6 +155,7 @@ const main = (): void => {
   ];
 
   printResults(results);
+  recordChecksums(results);
 };
 
 main();

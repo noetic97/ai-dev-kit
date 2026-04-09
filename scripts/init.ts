@@ -51,15 +51,24 @@ const prompt = (question: string, fallback = ""): Promise<string> =>
 const select = async (
   question: string,
   options: ReadonlyArray<SelectOption>,
+  defaultValue?: string,
 ): Promise<string> => {
+  const defaultIndex = defaultValue
+    ? options.findIndex((o) => o.value === defaultValue)
+    : -1;
+  const defaultChoice = defaultIndex >= 0 ? String(defaultIndex + 1) : "1";
+
   console.log(`\n${question}`);
-  options.forEach(({ label }, i) => console.log(`  ${i + 1}. ${label}`));
+  options.forEach(({ label, value }, i) => {
+    const marker = value === defaultValue ? " ←" : "";
+    console.log(`  ${i + 1}. ${label}${marker}`);
+  });
   console.log(`  ${options.length + 1}. Other`);
 
-  const raw = await prompt(`Choose 1–${options.length + 1}`, "1");
+  const raw = await prompt(`Choose 1–${options.length + 1}`, defaultChoice);
   const index = parseInt(raw, 10) - 1;
 
-  if (index === options.length) return prompt("Enter custom value");
+  if (index === options.length) return prompt("Enter custom value", defaultValue ?? "");
   return options[Math.max(0, Math.min(index, options.length - 1))]?.value ?? options[0].value;
 };
 
@@ -106,6 +115,30 @@ const kitRoot = resolve(import.meta.dir, "..");
 
 const readTemplate = (relativePath: string): string =>
   readFileSync(join(kitRoot, relativePath), "utf-8");
+
+// ── Existing answers ──────────────────────────────────────────────────────────
+
+// Extracts a value from a filled CLAUDE.md line like `**Name:** my-project`
+const extractField = (content: string, label: string): string => {
+  const match = content.match(new RegExp(`\\*\\*${label}:\\*\\*\\s*(.+)`));
+  return match?.[1]?.trim().replace(/\s*<!--.*-->$/, "").trim() ?? "";
+};
+
+const readExistingAnswers = (targetDir: string): Partial<ProjectAnswers> => {
+  const claudeMdPath = join(targetDir, ".claude", "CLAUDE.md");
+  if (!existsSync(claudeMdPath)) return {};
+
+  const content = readFileSync(claudeMdPath, "utf-8");
+  return {
+    projectName: extractField(content, "Name") || undefined,
+    projectDescription: extractField(content, "Description") || undefined,
+    projectType: extractField(content, "Type") || undefined,
+    frontendFramework: extractField(content, "Frontend") || undefined,
+    backendFramework: extractField(content, "Backend") || undefined,
+    database: extractField(content, "Database") || undefined,
+    testFramework: extractField(content, "Testing") || undefined,
+  };
+};
 
 // ── File write strategies ─────────────────────────────────────────────────────
 
@@ -263,23 +296,28 @@ const main = async (): Promise<void> => {
   console.log(`\nai-dev-kit init\n`);
   console.log(`Target: ${targetDir}\n`);
 
-  const projectName = await prompt("Project name?", "my-project");
-  const projectDescription = await prompt("One-line description?", "");
-  const projectType = await select("Project type?", PROJECT_TYPES);
+  const existing = readExistingAnswers(targetDir);
+  if (Object.keys(existing).length > 0) {
+    console.log("Existing .claude/CLAUDE.md found — pre-filling answers. Press enter to keep.\n");
+  }
+
+  const projectName = await prompt("Project name?", existing.projectName ?? "my-project");
+  const projectDescription = await prompt("One-line description?", existing.projectDescription ?? "");
+  const projectType = await select("Project type?", PROJECT_TYPES, existing.projectType);
 
   const hasFrontend = projectType === "Frontend" || projectType === "Full-stack";
   const hasBackend = projectType === "API" || projectType === "Full-stack";
 
   const frontendFramework = hasFrontend
-    ? await select("Frontend framework?", FRONTEND_FRAMEWORKS)
+    ? await select("Frontend framework?", FRONTEND_FRAMEWORKS, existing.frontendFramework)
     : "none";
 
   const backendFramework = hasBackend
-    ? await select("Backend framework?", BACKEND_FRAMEWORKS)
+    ? await select("Backend framework?", BACKEND_FRAMEWORKS, existing.backendFramework)
     : "none";
 
-  const database = await select("Database?", DATABASES);
-  const testFramework = await select("Test framework?", TEST_FRAMEWORKS);
+  const database = await select("Database?", DATABASES, existing.database);
+  const testFramework = await select("Test framework?", TEST_FRAMEWORKS, existing.testFramework);
 
   const answers: ProjectAnswers = {
     projectName,

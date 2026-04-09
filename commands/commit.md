@@ -7,10 +7,19 @@ Stage changed files and commit with a descriptive conventional commit message.
 Run the following to understand what has changed:
 
 ```bash
+git branch --show-current
 git status
 git diff
 git diff --staged
 ```
+
+If the current branch is `main` or `master`, **stop immediately**. Warn the user:
+
+> ⚠ You are on `main`. Committing directly to the default branch is usually a mistake.
+> Create a feature branch first: `git checkout -b <branch-name>`
+> Or confirm explicitly that a direct commit to main is intentional before proceeding.
+
+Do not stage or commit anything until the user confirms they want to proceed on main.
 
 ## Steps
 

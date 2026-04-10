@@ -10,6 +10,12 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { createInterface } from "readline";
 import { join, resolve } from "path";
+import { homedir } from "os";
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const kitRoot = resolve(import.meta.dir, "..");
+const globalClaudeMdPath = join(homedir(), ".claude", "CLAUDE.md");
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,6 +40,8 @@ type ScaffoldResult = {
   path: string;
   action: FileAction;
 };
+
+type GlobalStatus = "exists" | "installed" | "skipped";
 
 // ── Prompt helpers ───────────────────────────────────────────────────────────
 
@@ -117,8 +125,6 @@ const TEST_FRAMEWORKS = [
   { label: "None", value: "none" },
 ] as const satisfies ReadonlyArray<SelectOption>;
 
-const kitRoot = resolve(import.meta.dir, "..");
-
 const readTemplate = (relativePath: string): string =>
   readFileSync(join(kitRoot, relativePath), "utf-8");
 
@@ -198,6 +204,28 @@ const fillTemplate = (template: string, answers: ProjectAnswers): string =>
       "<!-- TODO: add any other protected paths -->",
     );
 
+// ── Global CLAUDE.md check ────────────────────────────────────────────────────
+
+const checkGlobalClaudeMd = async (): Promise<GlobalStatus> => {
+  if (existsSync(globalClaudeMdPath)) return "exists";
+
+  console.log("  No global CLAUDE.md found at ~/.claude/CLAUDE.md");
+  console.log("  This file defines your base coding standards and is extended by every project.");
+  console.log("  Without it, Claude has no global context to build on.\n");
+  console.log("  Note: Claude Code itself must also be installed separately.");
+  console.log("  See https://docs.anthropic.com/claude-code for setup instructions.\n");
+
+  const answer = await prompt("Install a starter global CLAUDE.md now? (y/N)", "N");
+  if (answer.toLowerCase() !== "y") return "skipped";
+
+  const claudeDir = join(homedir(), ".claude");
+  if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
+
+  const template = readTemplate("templates/global-claude-example.md");
+  writeFileSync(globalClaudeMdPath, template, "utf-8");
+  return "installed";
+};
+
 // ── Scaffold steps ────────────────────────────────────────────────────────────
 
 const scaffoldClaudeMd = (
@@ -270,7 +298,22 @@ const scaffoldContextMd = (
 
 // ── Output ────────────────────────────────────────────────────────────────────
 
-const printResult = (results: ScaffoldResult[]): void => {
+const globalStatusNote = (status: GlobalStatus): string => {
+  if (status === "installed") {
+    return `  3. Edit ${globalClaudeMdPath}
+       A starter has been installed — customise it to match your preferences before your first session.`;
+  }
+  if (status === "skipped") {
+    return `  3. Create ${globalClaudeMdPath}  ← required before using Claude Code
+       A starter template is available at: ${join(kitRoot, "templates", "global-claude-example.md")}
+       Copy and edit it, or write your own.
+       Also ensure Claude Code is installed: https://docs.anthropic.com/claude-code`;
+  }
+  return `  3. Read ${globalClaudeMdPath} before filling in .claude/CLAUDE.md
+       Only add overrides and project-specific context — anything defined globally does not need repeating.`;
+};
+
+const printResult = (results: ScaffoldResult[], globalStatus: GlobalStatus): void => {
   const icon: Record<FileAction, string> = {
     created: "✓",
     merged: "⊕",
@@ -289,7 +332,7 @@ Legend: ✓ created  ⊕ merged into existing  – already present, skipped
 Next steps:
   1. Fill in the TODOs in .claude/CLAUDE.md
   2. Update .claude/CONTEXT.md with your current focus
-  3. Add your global base to ~/.claude/CLAUDE.md if not already there
+${globalStatusNote(globalStatus)}
   4. Run \`claude\` in this directory to start a session
 `);
 };
@@ -301,6 +344,9 @@ const main = async (): Promise<void> => {
 
   console.log(`\nai-dev-kit init\n`);
   console.log(`Target: ${targetDir}\n`);
+
+  const globalStatus = await checkGlobalClaudeMd();
+  console.log();
 
   const existing = readExistingAnswers(targetDir);
   if (Object.keys(existing).length > 0) {
@@ -342,7 +388,7 @@ const main = async (): Promise<void> => {
     ...scaffoldCommands(targetDir),
   ];
 
-  printResult(results);
+  printResult(results, globalStatus);
 };
 
 main()

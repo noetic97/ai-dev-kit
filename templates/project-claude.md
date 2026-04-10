@@ -1,7 +1,8 @@
 # Claude Code — Project Steering File
 
-> Extends: ~/.claude/CLAUDE.md (global base)
-> Project-level rules override global rules where they conflict.
+> Extends: ~/.claude/CLAUDE.md — read that file before filling in this one.
+> Only add overrides and project-specific context here; anything already defined globally does not need repeating.
+> Project-level rules take precedence over global rules where they conflict.
 
 ---
 

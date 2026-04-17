@@ -1,3 +1,9 @@
+---
+name: review-fix-auto
+description: Autonomously implement review findings and re-run the review, looping until clean. Use after code-review or adversarial-review for hands-off fix cycles.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+---
+
 # /review-fix-auto
 
 Autonomously implement findings from the most recent code or adversarial review, re-run the review, and loop until clean or 3 passes are exhausted.

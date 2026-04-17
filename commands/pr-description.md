@@ -1,3 +1,10 @@
+---
+name: pr-description
+description: Generate PR title and description from the current changeset. Use when preparing a pull request.
+allowed-tools: Read, Bash
+model: sonnet
+---
+
 # /pr-description
 
 Generate a pull request title and description from the current changeset.

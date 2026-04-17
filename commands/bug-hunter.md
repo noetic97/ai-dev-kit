@@ -1,3 +1,9 @@
+---
+name: bug-hunter
+description: Systematic bug investigation — instrument first, fix with evidence. Use when debugging a problem that isn't immediately obvious.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+---
+
 # /bug-hunter
 
 Systematic bug investigation. Make the code observable first, then fix with evidence.

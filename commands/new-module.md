@@ -1,3 +1,9 @@
+---
+name: new-module
+description: Scaffold a new TypeScript module following project conventions. Use when creating a new module with types, logic, and tests.
+allowed-tools: Read, Write, Edit, Bash
+---
+
 # /new-module
 
 Scaffold a new TypeScript module following project conventions.

@@ -1,3 +1,10 @@
+---
+name: adr
+description: Create an Architecture Decision Record for a technical decision. Use when making or documenting a significant architectural choice.
+allowed-tools: Read, Write, Bash
+model: sonnet
+---
+
 # /adr
 
 Create an Architecture Decision Record (ADR) for a technical decision.

@@ -1,3 +1,9 @@
+---
+name: implement-and-ship
+description: Full flow from module scaffolding to committed PR — scaffold, review, fix, commit. Use when building and shipping a new module end-to-end.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+---
+
 # /implement-and-ship
 
 Orchestrate the full flow from module scaffolding to a committed, reviewed PR.

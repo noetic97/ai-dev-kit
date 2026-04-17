@@ -1,3 +1,10 @@
+---
+name: new-phase
+description: Scaffold a multi-session implementation phase with a tracking file. Use when a goal spans multiple sessions and needs step-level progress tracking.
+allowed-tools: Read, Write, Edit, Bash
+model: sonnet
+---
+
 # /new-phase
 
 Scaffold a multi-session implementation phase. Creates a `.claude/IMPL-<slug>.md` tracking file

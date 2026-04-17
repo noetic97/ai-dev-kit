@@ -1,3 +1,9 @@
+---
+name: code-review
+description: Thorough code review on specified files or current diff. Use when reviewing changes before commit or when asked to review code quality.
+allowed-tools: Read, Grep, Glob, Bash
+---
+
 # /code-review
 
 Perform a thorough code review on the specified files or diff.

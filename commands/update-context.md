@@ -1,3 +1,10 @@
+---
+name: update-context
+description: Refresh .claude/CONTEXT.md with current project state. Use at the end of a session or when focus shifts.
+allowed-tools: Read, Write, Bash
+model: sonnet
+---
+
 # /update-context
 
 Refresh `.claude/CONTEXT.md` to reflect the current state of the project.

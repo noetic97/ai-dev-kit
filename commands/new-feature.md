@@ -1,3 +1,9 @@
+---
+name: new-feature
+description: Spec-driven feature implementation. Discover → spec → implement. Use when starting a new feature from scratch.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+---
+
 # /new-feature
 
 Spec-driven feature implementation. Start from desired behavior, not code structure.

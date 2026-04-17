@@ -1,3 +1,10 @@
+---
+name: commit
+description: Stage files and commit with a conventional commit message. Use when ready to commit current changes.
+allowed-tools: Read, Bash
+model: sonnet
+---
+
 # /commit
 
 Stage changed files and commit with a descriptive conventional commit message.

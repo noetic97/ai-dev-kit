@@ -1,3 +1,10 @@
+---
+name: research
+description: Plan and document a technical research question into a structured RESEARCH file. Use when a decision needs investigation before implementation.
+allowed-tools: Read, Write, Bash, Grep, Glob
+model: sonnet
+---
+
 # /research
 
 Plan and document a technical research question. Produces a structured `.claude/RESEARCH-<slug>.md`

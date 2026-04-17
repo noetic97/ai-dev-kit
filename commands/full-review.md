@@ -1,3 +1,9 @@
+---
+name: full-review
+description: Complete review cycle — code review then adversarial review with autonomous fix loops between each stage. Use before merging significant changes.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+---
+
 # /full-review
 
 Run a complete automated review-and-fix cycle: code review, then adversarial review, with autonomous fix loops between each stage.

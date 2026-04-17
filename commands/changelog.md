@@ -1,3 +1,10 @@
+---
+name: changelog
+description: Generate a CHANGELOG entry from recent git history. Use when preparing a release or summarizing recent work.
+allowed-tools: Read, Bash
+model: sonnet
+---
+
 # /changelog
 
 Generate a CHANGELOG entry from recent git history.

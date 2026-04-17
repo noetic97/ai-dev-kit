@@ -1,3 +1,9 @@
+---
+name: security-review
+description: Security-focused review — input validation, secrets, injection, auth. Run before merging anything touching auth or external APIs.
+allowed-tools: Read, Grep, Glob, Bash
+---
+
 # /security-review
 
 Perform a security-focused review on the specified files or diff.

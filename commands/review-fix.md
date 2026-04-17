@@ -1,3 +1,9 @@
+---
+name: review-fix
+description: Work through review findings interactively, one fix at a time. Use after code-review or adversarial-review to implement findings manually.
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+---
+
 # /review-fix
 
 Work through findings from a code or adversarial review interactively, one fix at a time.

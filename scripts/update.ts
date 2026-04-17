@@ -15,14 +15,14 @@
  *       no stored hash (unknown state) → treat as locally modified → write .kit-update, warn
  */
 
-import { chmodSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "fs";
+import { chmodSync, existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, statSync, unlinkSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 import { homedir } from "os";
-import { checksumsPath, type Checksums, computeHash, readChecksums, withHash, writeChecksums } from "./lib/checksums";
+import { checksumsPath, type Checksums, computeHash, readChecksums, withHash, withoutHash, writeChecksums } from "./lib/checksums";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type UpdateAction = "created" | "updated" | "conflict" | "current";
+type UpdateAction = "created" | "updated" | "conflict" | "current" | "removed";
 
 type UpdateResult = {
   path: string;
@@ -204,6 +204,80 @@ const updateHooks = (
 ): { results: UpdateResult[]; checksums: Checksums } =>
   updateFlatFiles(join(kitRoot, "hooks"), join(claudeHome, "hooks"), ".sh", checksums, true);
 
+// ── Stale removal ─────────────────────────────────────────────────────────────
+
+// Removes kit-deployed files that no longer exist in the source directory.
+// Only removes files that are tracked in checksums — hand-added files are safe.
+
+const removeStaleFiles = (
+  srcDir: string,
+  destDir: string,
+  checksums: Checksums,
+): { results: UpdateResult[]; checksums: Checksums } => {
+  if (!existsSync(destDir)) return { results: [], checksums };
+
+  const srcFiles = existsSync(srcDir) ? new Set(readdirSync(srcDir)) : new Set<string>();
+
+  return readdirSync(destDir)
+    .filter((f) => !statSync(join(destDir, f)).isDirectory())
+    .reduce<{ results: UpdateResult[]; checksums: Checksums }>(
+      (acc, file) => {
+        const destPath = join(destDir, file);
+        if (srcFiles.has(file) || !acc.checksums[destPath]) return acc;
+
+        unlinkSync(destPath);
+        return {
+          results: [...acc.results, { path: destPath, action: "removed" }],
+          checksums: withoutHash(acc.checksums, destPath),
+        };
+      },
+      { results: [], checksums },
+    );
+};
+
+const removeStaleSkills = (
+  checksums: Checksums,
+): { results: UpdateResult[]; checksums: Checksums } => {
+  const srcDir = join(kitRoot, "skills");
+  const destDir = join(claudeHome, "skills");
+  if (!existsSync(destDir)) return { results: [], checksums };
+
+  const srcSkills = existsSync(srcDir) ? new Set(readdirSync(srcDir)) : new Set<string>();
+
+  return readdirSync(destDir)
+    .filter((entry) => statSync(join(destDir, entry)).isDirectory())
+    .reduce<{ results: UpdateResult[]; checksums: Checksums }>(
+      (acc, skillName) => {
+        const srcSkillDir = join(srcDir, skillName);
+        const destSkillDir = join(destDir, skillName);
+
+        const { results, checksums: updated } = removeStaleFiles(
+          srcSkills.has(skillName) ? srcSkillDir : "",
+          destSkillDir,
+          acc.checksums,
+        );
+
+        // Prune empty skill directory
+        if (existsSync(destSkillDir) && readdirSync(destSkillDir).length === 0) {
+          rmdirSync(destSkillDir);
+        }
+
+        return { results: [...acc.results, ...results], checksums: updated };
+      },
+      { results: [], checksums },
+    );
+};
+
+const removeStaleAgents = (
+  checksums: Checksums,
+): { results: UpdateResult[]; checksums: Checksums } =>
+  removeStaleFiles(join(kitRoot, "agents"), join(claudeHome, "agents"), checksums);
+
+const removeStaleHooks = (
+  checksums: Checksums,
+): { results: UpdateResult[]; checksums: Checksums } =>
+  removeStaleFiles(join(kitRoot, "hooks"), join(claudeHome, "hooks"), checksums);
+
 // ── Output ────────────────────────────────────────────────────────────────────
 
 const printResults = (results: UpdateResult[]): void => {
@@ -212,6 +286,7 @@ const printResults = (results: UpdateResult[]): void => {
     updated: "↑",
     conflict: "!",
     current: "–",
+    removed: "✕",
   };
 
   console.log("\nUpdated:\n");
@@ -229,7 +304,7 @@ ${conflicts.map((r) => `     ${r.path}.kit-update`).join("\n")}
 `);
   }
 
-  console.log(`Legend: ✓ created  ↑ updated  ! conflict (see .kit-update)  – already current\n`);
+  console.log(`Legend: ✓ created  ↑ updated  ! conflict (see .kit-update)  – already current  ✕ removed\n`);
 };
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -245,9 +320,19 @@ const main = (): void => {
   const { result: claudeMdResult, checksums: afterClaudeMd } = updateClaudeMd(initial);
   const { results: skillResults, checksums: afterSkills } = updateSkills(afterClaudeMd);
   const { results: agentResults, checksums: afterAgents } = updateAgents(afterSkills);
-  const { results: hookResults, checksums: final } = updateHooks(afterAgents);
+  const { results: hookResults, checksums: afterHooks } = updateHooks(afterAgents);
 
-  const allResults = [claudeMdResult, ...skillResults, ...agentResults, ...hookResults];
+  // Remove stale files after all updates — ensures removals only happen for files
+  // that were genuinely deleted from source, not ones that just weren't updated yet.
+  const { results: staleSkillResults, checksums: afterStaleSkills } = removeStaleSkills(afterHooks);
+  const { results: staleAgentResults, checksums: afterStaleAgents } = removeStaleAgents(afterStaleSkills);
+  const { results: staleHookResults, checksums: final } = removeStaleHooks(afterStaleAgents);
+
+  const allResults = [
+    claudeMdResult,
+    ...skillResults, ...agentResults, ...hookResults,
+    ...staleSkillResults, ...staleAgentResults, ...staleHookResults,
+  ];
   printResults(allResults);
   writeChecksums(checksumsPath, final);
 };

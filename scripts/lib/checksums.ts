@@ -37,3 +37,6 @@ export const withHash = (
   destPath: string,
   content: string,
 ): Checksums => ({ ...checksums, [destPath]: computeHash(content) });
+
+export const withoutHash = (checksums: Checksums, destPath: string): Checksums =>
+  Object.fromEntries(Object.entries(checksums).filter(([k]) => k !== destPath));

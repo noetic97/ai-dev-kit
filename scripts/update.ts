@@ -15,7 +15,7 @@
  *       no stored hash (unknown state) → treat as locally modified → write .kit-update, warn
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "fs";
+import { chmodSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 import { homedir } from "os";
 import { checksumsPath, type Checksums, computeHash, readChecksums, withHash, writeChecksums } from "./lib/checksums";
@@ -40,12 +40,14 @@ const updateFile = (
   srcPath: string,
   destPath: string,
   checksums: Checksums,
+  executable = false,
 ): { result: UpdateResult; checksums: Checksums } => {
   const srcContent = readFileSync(srcPath, "utf-8");
   const srcHash = computeHash(srcContent);
 
   if (!existsSync(destPath)) {
     writeFileSync(destPath, srcContent, "utf-8");
+    if (executable) chmodSync(destPath, 0o755);
     return {
       result: { path: destPath, action: "created" },
       checksums: withHash(checksums, destPath, srcContent),
@@ -55,7 +57,6 @@ const updateFile = (
   const installedContent = readFileSync(destPath, "utf-8");
   const installedHash = computeHash(installedContent);
 
-  // Already up to date — clean up any stale .kit-update from a previously resolved conflict
   if (installedHash === srcHash) {
     const kitUpdatePath = `${destPath}.kit-update`;
     if (existsSync(kitUpdatePath)) unlinkSync(kitUpdatePath);
@@ -69,47 +70,22 @@ const updateFile = (
   const isUnmodified = storedHash !== undefined && storedHash === installedHash;
 
   if (isUnmodified) {
-    // File matches what we originally installed — safe to overwrite
     writeFileSync(destPath, srcContent, "utf-8");
+    if (executable) chmodSync(destPath, 0o755);
     return {
       result: { path: destPath, action: "updated" },
       checksums: withHash(checksums, destPath, srcContent),
     };
   }
 
-  // Locally modified — write kit version alongside for manual merge
   writeFileSync(`${destPath}.kit-update`, srcContent, "utf-8");
   return {
     result: { path: destPath, action: "conflict" },
-    checksums, // preserve existing stored hash — user hasn't merged yet
+    checksums,
   };
 };
 
 // ── Update steps ──────────────────────────────────────────────────────────────
-
-const updateFilesFromDir = (
-  srcDir: string,
-  destDir: string,
-  checksums: Checksums,
-  exclude: ReadonlySet<string> = new Set(),
-): { results: UpdateResult[]; checksums: Checksums } => {
-  if (!existsSync(srcDir)) return { results: [], checksums };
-  if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
-
-  const files = readdirSync(srcDir).filter((f) => f.endsWith(".md") && !exclude.has(f));
-
-  return files.reduce<{ results: UpdateResult[]; checksums: Checksums }>(
-    (acc, file) => {
-      const { result, checksums: updated } = updateFile(
-        join(srcDir, file),
-        join(destDir, file),
-        acc.checksums,
-      );
-      return { results: [...acc.results, result], checksums: updated };
-    },
-    { results: [], checksums },
-  );
-};
 
 // CLAUDE.md is deployed via appendIfMissing — the installed file may contain user
 // content prepended to the kit section. Never auto-overwrite. Instead check whether
@@ -129,12 +105,8 @@ const updateClaudeMd = (checksums: Checksums): { result: UpdateResult; checksums
   }
 
   const installedContent = readFileSync(dest, "utf-8");
-
-  // Normalize line endings before comparison — installed file may have CRLF
-  // (Windows git config, editor auto-conversion) while source always has LF.
   const normalize = (s: string): string => s.replace(/\r\n/g, "\n");
 
-  // Kit section is present and current — nothing to do
   if (normalize(installedContent).includes(normalize(srcContent))) {
     const kitUpdatePath = `${dest}.kit-update`;
     if (existsSync(kitUpdatePath)) unlinkSync(kitUpdatePath);
@@ -144,8 +116,6 @@ const updateClaudeMd = (checksums: Checksums): { result: UpdateResult; checksums
     };
   }
 
-  // Kit source has changed — write .kit-update for manual merge.
-  // We never auto-overwrite CLAUDE.md since the installed copy may have a user prefix.
   writeFileSync(`${dest}.kit-update`, srcContent, "utf-8");
   return {
     result: { path: dest, action: "conflict" },
@@ -153,33 +123,86 @@ const updateClaudeMd = (checksums: Checksums): { result: UpdateResult; checksums
   };
 };
 
-const updateCommands = (
+const updateSkillDir = (
+  srcSkillDir: string,
+  destSkillDir: string,
   checksums: Checksums,
 ): { results: UpdateResult[]; checksums: Checksums } => {
-  const destDir = join(claudeHome, "commands");
-  const universalDir = join(kitRoot, "commands");
-  const toolkitDir = join(kitRoot, "commands", "toolkit");
+  if (!existsSync(destSkillDir)) mkdirSync(destSkillDir, { recursive: true });
 
-  const universalFiles = existsSync(universalDir)
-    ? new Set(readdirSync(universalDir).filter((f) => f.endsWith(".md")))
-    : new Set<string>();
-
-  const collisions = existsSync(toolkitDir)
-    ? new Set(readdirSync(toolkitDir).filter((f) => f.endsWith(".md") && universalFiles.has(f)))
-    : new Set<string>();
-
-  if (collisions.size > 0) {
-    console.warn(`\nWarning: toolkit commands share filenames with universal commands and will be skipped: ${[...collisions].join(", ")}\n`);
-  }
-
-  const universal = updateFilesFromDir(universalDir, destDir, checksums);
-  const toolkit = updateFilesFromDir(toolkitDir, destDir, universal.checksums, collisions);
-
-  return {
-    results: [...universal.results, ...toolkit.results],
-    checksums: toolkit.checksums,
-  };
+  return readdirSync(srcSkillDir)
+    .filter((f) => !statSync(join(srcSkillDir, f)).isDirectory())
+    .reduce<{ results: UpdateResult[]; checksums: Checksums }>(
+      (acc, file) => {
+        const { result, checksums: updated } = updateFile(
+          join(srcSkillDir, file),
+          join(destSkillDir, file),
+          acc.checksums,
+        );
+        return { results: [...acc.results, result], checksums: updated };
+      },
+      { results: [], checksums },
+    );
 };
+
+const updateSkills = (
+  checksums: Checksums,
+): { results: UpdateResult[]; checksums: Checksums } => {
+  const srcDir = join(kitRoot, "skills");
+  const destDir = join(claudeHome, "skills");
+  if (!existsSync(srcDir)) return { results: [], checksums };
+  if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
+
+  return readdirSync(srcDir)
+    .filter((entry) => statSync(join(srcDir, entry)).isDirectory())
+    .reduce<{ results: UpdateResult[]; checksums: Checksums }>(
+      (acc, entry) => {
+        const { results, checksums: updated } = updateSkillDir(
+          join(srcDir, entry),
+          join(destDir, entry),
+          acc.checksums,
+        );
+        return { results: [...acc.results, ...results], checksums: updated };
+      },
+      { results: [], checksums },
+    );
+};
+
+const updateFlatFiles = (
+  srcDir: string,
+  destDir: string,
+  ext: string,
+  checksums: Checksums,
+  executable = false,
+): { results: UpdateResult[]; checksums: Checksums } => {
+  if (!existsSync(srcDir)) return { results: [], checksums };
+  if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
+
+  return readdirSync(srcDir)
+    .filter((f) => f.endsWith(ext))
+    .reduce<{ results: UpdateResult[]; checksums: Checksums }>(
+      (acc, file) => {
+        const { result, checksums: updated } = updateFile(
+          join(srcDir, file),
+          join(destDir, file),
+          acc.checksums,
+          executable,
+        );
+        return { results: [...acc.results, result], checksums: updated };
+      },
+      { results: [], checksums },
+    );
+};
+
+const updateAgents = (
+  checksums: Checksums,
+): { results: UpdateResult[]; checksums: Checksums } =>
+  updateFlatFiles(join(kitRoot, "agents"), join(claudeHome, "agents"), ".md", checksums);
+
+const updateHooks = (
+  checksums: Checksums,
+): { results: UpdateResult[]; checksums: Checksums } =>
+  updateFlatFiles(join(kitRoot, "hooks"), join(claudeHome, "hooks"), ".sh", checksums, true);
 
 // ── Output ────────────────────────────────────────────────────────────────────
 
@@ -217,12 +240,14 @@ const main = (): void => {
   console.log("\nai-dev-kit update\n");
   console.log(`Target: ${claudeHome}\n`);
 
-  const initialChecksums = readChecksums(checksumsPath);
+  const initial = readChecksums(checksumsPath);
 
-  const { result: claudeMdResult, checksums: afterClaudeMd } = updateClaudeMd(initialChecksums);
-  const { results: commandResults, checksums: final } = updateCommands(afterClaudeMd);
+  const { result: claudeMdResult, checksums: afterClaudeMd } = updateClaudeMd(initial);
+  const { results: skillResults, checksums: afterSkills } = updateSkills(afterClaudeMd);
+  const { results: agentResults, checksums: afterAgents } = updateAgents(afterSkills);
+  const { results: hookResults, checksums: final } = updateHooks(afterAgents);
 
-  const allResults = [claudeMdResult, ...commandResults];
+  const allResults = [claudeMdResult, ...skillResults, ...agentResults, ...hookResults];
   printResults(allResults);
   writeChecksums(checksumsPath, final);
 };

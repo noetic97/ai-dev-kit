@@ -172,9 +172,9 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 ```
 
-- [ ] Add frontmatter to all commands listed above
-- [ ] Note: model routing — `sonnet` for lightweight commands (commit, pr-description, changelog, update-context, adr), default (Opus) for review and implementation commands
-- [ ] Commit: `feat: add skill frontmatter to all commands`
+- [x] Add frontmatter to all commands listed above
+- [x] Note: model routing — `sonnet` for lightweight commands (commit, pr-description, changelog, update-context, adr), default (Opus) for review and implementation commands
+- [x] Commit: `feat: add skill frontmatter to all commands`
 
 ---
 

@@ -9,7 +9,7 @@
 ## Current Focus
 
 - Continuing PLAN-skills-agents-migration.md on branch `dev-kit-refactor`
-- Phases 1–3 complete. Next: Phase 4 (Hooks), Phase 5 (Deploy scripts), Phase 6 (Backlog cleanup)
+- Phases 1–5 complete. Next: Phase 6 (Backlog cleanup)
 
 ---
 
@@ -51,15 +51,12 @@ templates/context.md                       →   .claude/CONTEXT.md  (never-over
 ## Known Gotchas
 
 - `shift+enter` newline binding doesn't work in standard Terminal.app — requires iTerm2 with CSI u mode enabled (Preferences → Profiles → Keys → Report modifiers using CSI u)
-- Deploy scripts (`install-global.ts`, `init.ts`, `update.ts`) still reference `commands/` paths — they are broken until Phase 5 is done. Do not run them until then.
 - Re-running `ai-init` in an existing project is safe but will never update existing skill files, only create missing ones
 
 ---
 
 ## Next Up
 
-- **Phase 4** — Hooks: `post-write-test.sh` (PostToolUse on Write/Edit) and `session-end-reminder.sh` (Stop event). Need `.claude/settings.json`. Note: hooks live in `.claude/` which is gitignored — need to decide if hooks source lives in a `hooks/` dir at root like skills/agents, or if they're configured differently. Raise this at start of next session.
-- **Phase 5** — Update `scripts/install-global.ts`, `scripts/init.ts`, `scripts/update.ts` for new `skills/` and `agents/` paths. Plan first before writing code.
 - **Phase 6** — Backlog cleanup: close review-agent item, fix `select()` NaN fallback, stale skills removal logic
 
 ---

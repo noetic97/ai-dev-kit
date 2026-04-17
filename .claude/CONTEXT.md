@@ -8,50 +8,44 @@
 
 ## Current Focus
 
-- Working through PLAN-skills-agents-migration.md — migrating commands to skills/agents structure
-- On branch `dev-kit-refactor` — all plan work goes here, single PR at end
+- Continuing PLAN-skills-agents-migration.md on branch `dev-kit-refactor`
+- Phases 1–3 complete. Next: Phase 4 (Hooks), Phase 5 (Deploy scripts), Phase 6 (Backlog cleanup)
 
 ---
 
 ## Active Decisions
 
-- `commands/toolkit/` is for toolkit-only commands — not deployed to projects via init, only via install-global
-- `commands/` universal commands are deployed by both init and install-global
+- `skills/` at root is source of truth for skills — deployed to `.claude/skills/` in target projects
+- `agents/` at root is source of truth for agents — deployed to `.claude/agents/` in target projects
+- `scope: global` frontmatter on a skill = install-global only, not init (replaces old `commands/toolkit/`)
+- `commands/` directory is gone — fully migrated to `skills/`
+- `.claude/` directory contents are gitignored artifacts — never edit deployed copies directly
+- All migration work is on `dev-kit-refactor` branch — one PR when phases complete
 - Slash commands are entered inside a `claude` session, not the terminal shell
 - FE/BE framework split in init prompts — `frontendFramework` and `backendFramework` are separate fields
-- `commands/` uses `readdirSync` dynamic discovery — no static file lists to maintain
-- `.claude/commands/` is gitignored — deployed copy is local-only, source of truth is `commands/`
-- All migration work is on `dev-kit-refactor` branch — one PR for the full plan
 
 ---
 
 ## In Progress
 
-- Phase 1.2 — adding frontmatter to all remaining commands (next step)
+- Nothing — all committed and clean
 
 ---
 
 ## Known Gotchas
 
-<!-- Things that will bite Claude if it doesn't know about them. -->
-
 - `shift+enter` newline binding doesn't work in standard Terminal.app — requires iTerm2 with CSI u mode enabled (Preferences → Profiles → Keys → Report modifiers using CSI u)
-- `commands/toolkit/` is intentionally invisible to `init` — adding a command there won't appear in scaffolded projects
-- Re-running `ai-init` in an existing project is safe but will never update existing command files, only create missing ones
+- Deploy scripts (`install-global.ts`, `init.ts`, `update.ts`) still reference `commands/` paths — they are broken until Phase 5 is done. Do not run them until then.
+- Re-running `ai-init` in an existing project is safe but will never update existing skill files, only create missing ones
 
 ---
 
 ## Next Up
 
-- Phase 1.2: frontmatter on all remaining commands
-- Phase 2: create `.claude/agents/` with adversarial-reviewer, diff-explorer, security-auditor
-- Phase 3: migrate commands to `commands/skills/<name>/SKILL.md` directory structure
-- Phase 4: hooks (post-write test, session-end reminder)
-- Phase 5: update deploy scripts for new structure
-- Phase 6: backlog cleanup
+- **Phase 4** — Hooks: `post-write-test.sh` (PostToolUse on Write/Edit) and `session-end-reminder.sh` (Stop event). Need `.claude/settings.json`. Note: hooks live in `.claude/` which is gitignored — need to decide if hooks source lives in a `hooks/` dir at root like skills/agents, or if they're configured differently. Raise this at start of next session.
+- **Phase 5** — Update `scripts/install-global.ts`, `scripts/init.ts`, `scripts/update.ts` for new `skills/` and `agents/` paths. Plan first before writing code.
+- **Phase 6** — Backlog cleanup: close review-agent item, fix `select()` NaN fallback, stale skills removal logic
 
 ---
 
 ## Session Notes
-
-<!-- Scratch space. Cleared between major milestones. -->

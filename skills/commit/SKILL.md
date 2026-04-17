@@ -65,17 +65,7 @@ Inform the user which branch was created before proceeding with the commit.
 
    If no section is affected, leave CONTEXT.md untouched.
 
-4. **Check for commands dir changes** — if any file being staged is under `.claude/commands/`
-   (excluding `commands-updates-ref.md` itself), add a row to `.claude/commands/commands-updates-ref.md`
-   before committing:
-
-   ```
-   | YYYY-MM-DD | <filename> | <one-line description of what changed> | <why> |
-   ```
-
-   Stage `commands-updates-ref.md` as part of the same commit.
-
-5. **Stage and commit**:
+4. **Stage and commit**:
 
    ```bash
    git add <specific files>

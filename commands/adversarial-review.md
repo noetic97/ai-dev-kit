@@ -1,3 +1,11 @@
+---
+name: adversarial-review
+description: Adversarial re-review of code just written. Skeptical senior engineer who did not write this code. Use after any implementation to find holes before committing.
+context: fork
+agent: Explore
+allowed-tools: Read, Grep, Glob, Bash
+---
+
 # /adversarial-review
 
 Switch roles: review the code you just wrote as a skeptical adversary.

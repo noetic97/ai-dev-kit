@@ -8,8 +8,7 @@
 
 ## Current Focus
 
-- Continuing PLAN-skills-agents-migration.md on branch `dev-kit-refactor`
-- Phases 1–5 complete. Next: Phase 6 (Backlog cleanup)
+- PLAN-skills-agents-migration.md **complete** — all 6 phases done on `main`
 
 ---
 
@@ -57,7 +56,7 @@ templates/context.md                       →   .claude/CONTEXT.md  (never-over
 
 ## Next Up
 
-- **Phase 6** — Backlog cleanup: close review-agent item, fix `select()` NaN fallback, stale skills removal logic
+- **Backlog** — remaining items: tests for scripts, `--dry-run` for update.ts, Verdaccio publish, framework-aware template injection
 
 ---
 

@@ -1,3 +1,4 @@
+<!-- ai-dev-kit:global:v1 -->
 # Claude Code — Global Steering File
 
 ## Role & Collaboration Model

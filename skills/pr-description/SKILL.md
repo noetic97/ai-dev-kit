@@ -34,20 +34,7 @@ Read **every changed file** in the diff — not just source code. Documentation,
 templates, and command files all count. A missing entry in README.md or a new file not
 reflected in a config is a gap that belongs in the PR description.
 
-## Output Format
-
-**Title** — one line, under 70 characters, conventional commit style:
-`<type>: <concise description>`
-Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
-
-**Summary** — 3–6 bullet points covering what changed and why. Group related changes.
-Do not list every file — describe the logical changes they represent.
-
-**Changed files** — a brief flat list of every file touched, annotated with one of:
-`added` | `modified` | `deleted`. This is the completeness check — nothing should be missing.
-
-**Test plan** — a short checklist of what to verify before merging. Be specific to this
-changeset, not generic.
+Use the output format defined in `pr-template.md`.
 
 ## Create the PR
 

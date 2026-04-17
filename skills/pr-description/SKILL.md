@@ -38,6 +38,15 @@ Use the output format defined in `pr-template.md`.
 
 ## Create the PR
 
+**First: verify we are not on the default branch.**
+If `git branch --show-current` matches the detected base branch (e.g. `main` or `master`),
+stop immediately and tell the user:
+
+> Cannot create a PR from the default branch. All commits need to be on a feature branch first.
+> Create one now with: `git checkout -b <type>/<short-description>`
+
+Do not push, do not generate a description. Wait for the user to switch branches.
+
 After generating the description, detect whether a PR already exists for this branch,
 then push and create/update the PR by running the commands directly — do not print
 them as a code block for the user to run manually.

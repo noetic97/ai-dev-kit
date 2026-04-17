@@ -105,6 +105,7 @@ This is non-negotiable. I refactor OOP into functional patterns. Follow this in 
 - Common types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
 - Do not commit commented-out code, debug logs, or unfinished work without a `wip:` prefix
 - If a task naturally produces multiple logical changes, commit them separately — don't wait until the end
+- **Always use `/commit` to create commits** — never call `git commit` directly. The `/commit` skill enforces branch hygiene (creates a feature branch if on `main`/`master`) and ensures consistent commit message formatting.
 
 ---
 

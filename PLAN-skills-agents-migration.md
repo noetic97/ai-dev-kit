@@ -324,11 +324,11 @@ skills/code-review/
   review-rubric.md   ← the 6 criteria (correctness, FP, TS, tests, readability, architecture)
 ```
 
-- [ ] Create `skills/code-review/`
-- [ ] Extract criteria into `review-rubric.md`
-- [ ] Write lean `SKILL.md` that references `review-rubric.md`
-- [ ] Delete `commands/code-review.md`
-- [ ] Commit: `refactor: migrate code-review to skills directory structure`
+- [x] Create `skills/code-review/`
+- [x] Extract criteria into `review-rubric.md`
+- [x] Write lean `SKILL.md` that references `review-rubric.md`
+- [x] Delete `commands/code-review.md`
+- [x] Commit: `refactor: migrate code-review to skills directory structure`
 
 ### 3.2 Migrate `adversarial-review`
 
@@ -338,11 +338,11 @@ skills/adversarial-review/
   attack-vectors.md    ← the what-to-look-for checklist (edge cases, architecture, logic, tests, security)
 ```
 
-- [ ] Create `skills/adversarial-review/`
-- [ ] Extract attack vectors into `attack-vectors.md`
-- [ ] Write `SKILL.md` with `context: fork`, `agent: adversarial-reviewer`
-- [ ] Delete `commands/adversarial-review.md`
-- [ ] Commit: `refactor: migrate adversarial-review to skills directory`
+- [x] Create `skills/adversarial-review/`
+- [x] Extract attack vectors into `attack-vectors.md`
+- [x] Write `SKILL.md` with `context: fork`, `agent: adversarial-reviewer`
+- [x] Delete `commands/adversarial-review.md`
+- [x] Commit: `refactor: migrate adversarial-review to skills directory`
 
 ### 3.3 Migrate `new-module`
 
@@ -352,8 +352,8 @@ skills/new-module/
   module-structure.md   ← the output structure template (index.ts, types.ts, etc.)
 ```
 
-- [ ] Migrate `new-module`
-- [ ] Commit: `refactor: migrate new-module to skills directory`
+- [x] Migrate `new-module`
+- [x] Commit: `refactor: migrate new-module to skills directory`
 
 ### 3.4 Migrate `pr-description`
 
@@ -363,28 +363,28 @@ skills/pr-description/
   pr-template.md    ← the output format spec (title, summary, changed files, test plan)
 ```
 
-- [ ] Migrate `pr-description`
-- [ ] Commit: `refactor: migrate pr-description to skills directory`
+- [x] Migrate `pr-description`
+- [x] Commit: `refactor: migrate pr-description to skills directory`
 
 ### 3.5 Migrate remaining skills
 
 Migrate the rest individually:
 
-- [ ] `new-feature` → extract spec template into `spec-template.md`
-- [ ] `bug-hunter` → extract phase checklist into `debug-phases.md`
-- [ ] `security-review` → extract OWASP checklist into `security-checklist.md`
-- [ ] `full-review`, `review-fix`, `review-fix-auto`, `implement-and-ship` (lean, no supporting files needed)
-- [ ] `commit`, `changelog`, `adr`, `update-context`, `new-phase`, `research` (lean, no supporting files needed)
-- [ ] `sync-docs` → add `scope: global` frontmatter (toolkit-only, deploy via install-global only)
-- [ ] Commit each migration separately
+- [x] `new-feature` → extract spec template into `spec-template.md`
+- [x] `bug-hunter` → extract phase checklist into `debug-phases.md`
+- [x] `security-review` → extract OWASP checklist into `security-checklist.md`
+- [x] `full-review`, `review-fix`, `review-fix-auto`, `implement-and-ship` (lean, no supporting files needed)
+- [x] `commit`, `changelog`, `adr`, `update-context`, `new-phase`, `research` (lean, no supporting files needed)
+- [x] `sync-docs` → add `scope: global` frontmatter (toolkit-only, deploy via install-global only)
+- [x] Commit each migration separately
 
 ### 3.6 Delete `commands/` directory
 
 Once all skills are migrated:
 
-- [ ] Confirm `commands/` is empty (all flat files migrated, toolkit dir gone)
-- [ ] Delete `commands/`
-- [ ] Commit: `chore: remove commands/ — fully migrated to skills/`
+- [x] Confirm `commands/` is empty (all flat files migrated, toolkit dir gone)
+- [x] Delete `commands/`
+- [x] Commit: `chore: remove commands/ — fully migrated to skills/`
 
 ### 3.7 Update deploy path convention
 
@@ -400,9 +400,9 @@ agents/  → source of truth for agents  → deployed to .claude/agents/  (also 
 Toolkit-only skills use scope: global frontmatter — deployed by install-global, not init.
 ```
 
-- [ ] Update `CLAUDE.md` conventions section
-- [ ] Update `README.md` table to reflect new structure
-- [ ] Commit: `docs: update conventions for skills directory structure`
+- [x] Update `CLAUDE.md` conventions section
+- [x] Update `README.md` table to reflect new structure
+- [x] Commit: `docs: update conventions for skills directory structure`
 
 ---
 

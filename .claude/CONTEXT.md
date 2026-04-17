@@ -13,13 +13,29 @@
 
 ---
 
+## Deployment Model (canonical — do not re-litigate)
+
+```
+Root (source of truth, version-controlled)     Deployed artifacts (gitignored)
+───────────────────────────────────────────    ──────────────────────────────────────
+skills/                                    →   .claude/skills/
+agents/                                    →   .claude/agents/
+hooks/                                     →   .claude/hooks/
+templates/settings.json                    →   .claude/settings.json
+templates/project-claude.md                →   .claude/CLAUDE.md   (never-overwrite)
+templates/context.md                       →   .claude/CONTEXT.md  (never-overwrite)
+```
+
+- `.claude/CLAUDE.md` and `.claude/CONTEXT.md` in THIS repo are live working files, not artifacts — they are committed.
+- Everything else under `.claude/` is a deployed artifact — gitignored, populated by `init` or `install-global`.
+- `settings.json` deploy strategy: never-overwrite (JSON can't be string-appended safely).
+- `scope: global` frontmatter on a skill = `install-global` only, not `init`.
+
+---
+
 ## Active Decisions
 
-- `skills/` at root is source of truth for skills — deployed to `.claude/skills/` in target projects
-- `agents/` at root is source of truth for agents — deployed to `.claude/agents/` in target projects
-- `scope: global` frontmatter on a skill = install-global only, not init (replaces old `commands/toolkit/`)
 - `commands/` directory is gone — fully migrated to `skills/`
-- `.claude/` directory contents are gitignored artifacts — never edit deployed copies directly
 - All migration work is on `dev-kit-refactor` branch — one PR when phases complete
 - Slash commands are entered inside a `claude` session, not the terminal shell
 - FE/BE framework split in init prompts — `frontendFramework` and `backendFramework` are separate fields

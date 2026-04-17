@@ -7,5 +7,10 @@ dist/
 *.tsbuildinfo
 .DS_Store
 
-# Deployed command copies — derived from commands/, populated by init/install-global
+# Deployed artifacts — source of truth lives at root (skills/, agents/, hooks/, templates/)
+# These are populated by init or install-global and should never be edited directly.
 .claude/commands/
+.claude/skills/
+.claude/agents/
+.claude/hooks/
+.claude/settings.json

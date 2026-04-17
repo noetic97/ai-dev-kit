@@ -4,20 +4,28 @@
  * ai-dev-kit init
  *
  * Scaffolds Claude Code steering files into a target project.
- * Merge strategy: appends to existing files rather than overwriting.
+ *
+ * Deployment model:
+ *   skills/             → .claude/skills/   (excludes scope: global skills)
+ *   agents/             → .claude/agents/
+ *   hooks/              → .claude/hooks/
+ *   templates/settings.json → .claude/settings.json  (never-overwrite)
+ *   templates/project-claude.md → .claude/CLAUDE.md  (never-overwrite)
+ *   templates/context.md        → .claude/CONTEXT.md (never-overwrite)
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { chmodSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { createInterface } from "readline";
 import { join, resolve } from "path";
 import { homedir } from "os";
+import { readFrontmatterValue } from "./lib/frontmatter";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const kitRoot = resolve(import.meta.dir, "..");
 const globalClaudeMdPath = join(homedir(), ".claude", "CLAUDE.md");
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 type ProjectAnswers = {
   projectName: string;
@@ -43,7 +51,7 @@ type ScaffoldResult = {
 
 type GlobalStatus = "exists" | "installed" | "skipped";
 
-// ── Prompt helpers ───────────────────────────────────────────────────────────
+// ── Prompt helpers ────────────────────────────────────────────────────────────
 
 // Single readline interface shared across all prompts — creating a new iterator
 // per call (e.g. `for await (const line of console)`) abandons stdin mid-stream.
@@ -64,7 +72,6 @@ const select = async (
   const defaultIndex = defaultValue
     ? options.findIndex((o) => o.value === defaultValue)
     : -1;
-  // If the existing value is a custom string not in the options list, default to "Other"
   const isCustomDefault = defaultValue !== undefined && defaultValue !== "" && defaultIndex === -1;
   const defaultChoice = defaultIndex >= 0
     ? String(defaultIndex + 1)
@@ -130,7 +137,6 @@ const readTemplate = (relativePath: string): string =>
 
 // ── Existing answers ──────────────────────────────────────────────────────────
 
-// Extracts a value from a filled CLAUDE.md line like `**Name:** my-project`
 const extractField = (content: string, label: string): string => {
   const match = content.match(new RegExp(`\\*\\*${label}:\\*\\*\\s*(.+)`));
   return match?.[1]?.trim().replace(/\s*<!--.*-->$/, "").trim() ?? "";
@@ -159,18 +165,17 @@ const writeNew = (path: string, content: string): FileAction => {
   return "created";
 };
 
-const appendIfMissing = (
-  path: string,
-  content: string,
-  marker: string,
-): FileAction => {
+const appendIfMissing = (path: string, content: string, marker: string): FileAction => {
   if (!existsSync(path)) return writeNew(path, content);
-
   const existing = readFileSync(path, "utf-8");
   if (existing.includes(marker)) return "skipped";
-
   writeFileSync(path, `${existing}\n\n${content}`, "utf-8");
   return "merged";
+};
+
+const writeIfMissing = (path: string, content: string): FileAction => {
+  if (existsSync(path)) return "skipped";
+  return writeNew(path, content);
 };
 
 // ── Token replacement ─────────────────────────────────────────────────────────
@@ -185,24 +190,12 @@ const fillTemplate = (template: string, answers: ProjectAnswers): string =>
     .replace(/\{\{DATABASE\}\}/g, answers.database || "none")
     .replace(/\{\{TEST_FRAMEWORK\}\}/g, answers.testFramework || "Bun test")
     .replace(/\{\{OTHER_DEPS\}\}/g, "TBD")
-    .replace(
-      /\{\{ARCHITECTURE_DESCRIPTION\}\}/g,
-      "<!-- TODO: describe your architecture -->",
-    )
+    .replace(/\{\{ARCHITECTURE_DESCRIPTION\}\}/g, "<!-- TODO: describe your architecture -->")
     .replace(/\{\{DOMAIN_GLOSSARY\}\}/g, "<!-- TODO: define domain terms -->")
     .replace(/\{\{KEY_TYPES\}\}/g, "<!-- TODO: paste key types here -->")
-    .replace(
-      /\{\{INTEGRATIONS\}\}/g,
-      "<!-- TODO: list external integrations -->",
-    )
-    .replace(
-      /\{\{PROJECT_CONVENTIONS\}\}/g,
-      "<!-- TODO: note any exceptions to global CLAUDE.md -->",
-    )
-    .replace(
-      /\{\{OTHER_OFF_LIMITS\}\}/g,
-      "<!-- TODO: add any other protected paths -->",
-    );
+    .replace(/\{\{INTEGRATIONS\}\}/g, "<!-- TODO: list external integrations -->")
+    .replace(/\{\{PROJECT_CONVENTIONS\}\}/g, "<!-- TODO: note any exceptions to global CLAUDE.md -->")
+    .replace(/\{\{OTHER_OFF_LIMITS\}\}/g, "<!-- TODO: add any other protected paths -->");
 
 // ── Global CLAUDE.md check ────────────────────────────────────────────────────
 
@@ -228,41 +221,112 @@ const checkGlobalClaudeMd = async (): Promise<GlobalStatus> => {
 
 // ── Scaffold steps ────────────────────────────────────────────────────────────
 
-const scaffoldClaudeMd = (
-  targetDir: string,
-  answers: ProjectAnswers,
-): ScaffoldResult => {
+const scaffoldClaudeMd = (targetDir: string, answers: ProjectAnswers): ScaffoldResult => {
   const claudeDir = join(targetDir, ".claude");
   if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
 
   const destPath = join(claudeDir, "CLAUDE.md");
   const template = readTemplate("templates/project-claude.md");
   const filled = fillTemplate(template, answers);
-
-  const action = appendIfMissing(
-    destPath,
-    filled,
-    "Claude Code — Project Steering File",
-  );
-
+  const action = appendIfMissing(destPath, filled, "Claude Code — Project Steering File");
   return { path: destPath, action };
 };
 
-const scaffoldCommands = (targetDir: string): ScaffoldResult[] => {
-  const srcDir = join(kitRoot, "commands");
-  const commandsDir = join(targetDir, ".claude", "commands");
-  if (!existsSync(commandsDir)) mkdirSync(commandsDir, { recursive: true });
+const scaffoldContextMd = (targetDir: string, answers: ProjectAnswers): ScaffoldResult => {
+  const claudeDir = join(targetDir, ".claude");
+  if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
 
-  const files = readdirSync(srcDir).filter((f) => f.endsWith(".md"));
+  const destPath = join(claudeDir, "CONTEXT.md");
+  if (existsSync(destPath)) return { path: destPath, action: "skipped" };
 
-  return files.map((file) => {
-    const destPath = join(commandsDir, file);
-    if (existsSync(destPath)) return { path: destPath, action: "skipped" };
+  const template = readTemplate("templates/context.md");
+  const filled = template
+    .replace(/\{\{PROJECT_NAME\}\}/g, answers.projectName)
+    .replace(/\{\{CURRENT_FOCUS\}\}/g, "<!-- TODO: describe what you are actively working on -->");
 
-    const content = readTemplate(`commands/${file}`);
-    writeFileSync(destPath, content, "utf-8");
-    return { path: destPath, action: "created" };
+  writeFileSync(destPath, filled, "utf-8");
+  return { path: destPath, action: "created" };
+};
+
+const scaffoldSkillDir = (
+  srcSkillDir: string,
+  destSkillDir: string,
+): ScaffoldResult[] => {
+  if (!existsSync(destSkillDir)) mkdirSync(destSkillDir, { recursive: true });
+
+  return readdirSync(srcSkillDir).flatMap((file) => {
+    const srcPath = join(srcSkillDir, file);
+    if (statSync(srcPath).isDirectory()) return [];
+
+    const destPath = join(destSkillDir, file);
+    if (existsSync(destPath)) return [{ path: destPath, action: "skipped" as FileAction }];
+
+    writeFileSync(destPath, readFileSync(srcPath, "utf-8"), "utf-8");
+    return [{ path: destPath, action: "created" as FileAction }];
   });
+};
+
+const scaffoldSkills = (targetDir: string): ScaffoldResult[] => {
+  const srcDir = join(kitRoot, "skills");
+  const destDir = join(targetDir, ".claude", "skills");
+  if (!existsSync(srcDir)) return [];
+  if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
+
+  return readdirSync(srcDir).flatMap((entry) => {
+    const srcSkillDir = join(srcDir, entry);
+    if (!statSync(srcSkillDir).isDirectory()) return [];
+
+    // Skip toolkit-only skills — those are for install-global only
+    const skillMdPath = join(srcSkillDir, "SKILL.md");
+    if (existsSync(skillMdPath)) {
+      const content = readFileSync(skillMdPath, "utf-8");
+      if (readFrontmatterValue(content, "scope") === "global") return [];
+    }
+
+    return scaffoldSkillDir(srcSkillDir, join(destDir, entry));
+  });
+};
+
+const scaffoldAgents = (targetDir: string): ScaffoldResult[] => {
+  const srcDir = join(kitRoot, "agents");
+  const destDir = join(targetDir, ".claude", "agents");
+  if (!existsSync(srcDir)) return [];
+  if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
+
+  return readdirSync(srcDir)
+    .filter((f) => f.endsWith(".md"))
+    .map((file) => {
+      const destPath = join(destDir, file);
+      if (existsSync(destPath)) return { path: destPath, action: "skipped" as FileAction };
+      writeFileSync(destPath, readFileSync(join(srcDir, file), "utf-8"), "utf-8");
+      return { path: destPath, action: "created" as FileAction };
+    });
+};
+
+const scaffoldHooks = (targetDir: string): ScaffoldResult[] => {
+  const srcDir = join(kitRoot, "hooks");
+  const destDir = join(targetDir, ".claude", "hooks");
+  if (!existsSync(srcDir)) return [];
+  if (!existsSync(destDir)) mkdirSync(destDir, { recursive: true });
+
+  return readdirSync(srcDir)
+    .filter((f) => f.endsWith(".sh"))
+    .map((file) => {
+      const destPath = join(destDir, file);
+      if (existsSync(destPath)) return { path: destPath, action: "skipped" as FileAction };
+      writeFileSync(destPath, readFileSync(join(srcDir, file), "utf-8"), "utf-8");
+      chmodSync(destPath, 0o755);
+      return { path: destPath, action: "created" as FileAction };
+    });
+};
+
+const scaffoldSettings = (targetDir: string): ScaffoldResult => {
+  const claudeDir = join(targetDir, ".claude");
+  if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
+
+  const destPath = join(claudeDir, "settings.json");
+  const action = writeIfMissing(destPath, readTemplate("templates/settings.json"));
+  return { path: destPath, action };
 };
 
 const scaffoldClaudeIgnore = (targetDir: string): ScaffoldResult => {
@@ -270,30 +334,6 @@ const scaffoldClaudeIgnore = (targetDir: string): ScaffoldResult => {
   const content = readTemplate("templates/claudeignore");
   const action = appendIfMissing(destPath, content, "node_modules/");
   return { path: destPath, action };
-};
-
-const scaffoldContextMd = (
-  targetDir: string,
-  answers: ProjectAnswers,
-): ScaffoldResult => {
-  const claudeDir = join(targetDir, ".claude");
-  if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
-
-  const destPath = join(claudeDir, "CONTEXT.md");
-
-  // Never overwrite — context is hand-maintained, never generated
-  if (existsSync(destPath)) return { path: destPath, action: "skipped" };
-
-  const template = readTemplate("templates/context.md");
-  const filled = template
-    .replace(/\{\{PROJECT_NAME\}\}/g, answers.projectName)
-    .replace(
-      /\{\{CURRENT_FOCUS\}\}/g,
-      "<!-- TODO: describe what you are actively working on -->",
-    );
-
-  writeFileSync(destPath, filled, "utf-8");
-  return { path: destPath, action: "created" };
 };
 
 // ── Output ────────────────────────────────────────────────────────────────────
@@ -314,11 +354,7 @@ const globalStatusNote = (status: GlobalStatus): string => {
 };
 
 const printResult = (results: ScaffoldResult[], globalStatus: GlobalStatus): void => {
-  const icon: Record<FileAction, string> = {
-    created: "✓",
-    merged: "⊕",
-    skipped: "–",
-  };
+  const icon: Record<FileAction, string> = { created: "✓", merged: "⊕", skipped: "–" };
 
   console.log("\nScaffolded:\n");
   for (const { path, action } of results) {
@@ -385,7 +421,10 @@ const main = async (): Promise<void> => {
     scaffoldClaudeMd(targetDir, answers),
     scaffoldContextMd(targetDir, answers),
     scaffoldClaudeIgnore(targetDir),
-    ...scaffoldCommands(targetDir),
+    scaffoldSettings(targetDir),
+    ...scaffoldSkills(targetDir),
+    ...scaffoldAgents(targetDir),
+    ...scaffoldHooks(targetDir),
   ];
 
   printResult(results, globalStatus);

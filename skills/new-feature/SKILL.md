@@ -34,19 +34,7 @@ are better than an exhaustive list.
 
 ## Phase 2 — Spec
 
-Write a feature spec with:
-
-**Summary** — one paragraph, plain language: what this feature does and why
-
-**Acceptance criteria** — bulleted list of observable outcomes that define "done"
-
-**Affected surfaces** — which files, modules, or layers will change
-
-**Data shapes** — any new types, API request/response shapes, or database schema changes
-
-**Out of scope** — what this change explicitly does not include
-
-**Open questions** — anything unresolved that needs a decision before or during implementation
+Write a feature spec using the structure in `spec-template.md`.
 
 Present the spec and wait for approval. If I ask for changes, revise and re-present.
 

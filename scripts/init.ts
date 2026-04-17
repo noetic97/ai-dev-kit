@@ -86,6 +86,14 @@ const select = async (
   });
   console.log(`  ${options.length + 1}. Other`);
 
+  // Non-interactive stdin (piped input): can't re-prompt on invalid input.
+  // Resolve immediately using the computed default rather than looping indefinitely.
+  if (!process.stdin.isTTY) {
+    const defaultIndex = parseInt(defaultChoice, 10) - 1;
+    if (defaultIndex === options.length) return defaultValue ?? options[0].value;
+    return options[defaultIndex]?.value ?? options[0].value;
+  }
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const raw = await prompt(`Choose 1–${options.length + 1}`, defaultChoice);
@@ -189,22 +197,24 @@ const writeIfMissing = (path: string, content: string): FileAction => {
 
 // ── Token replacement ─────────────────────────────────────────────────────────
 
+// Replacer functions prevent String.replace from interpreting $ patterns
+// (e.g. $& expands to matched string, $1 to capture group) in user-provided values.
 const fillTemplate = (template: string, answers: ProjectAnswers): string =>
   template
-    .replace(/\{\{PROJECT_NAME\}\}/g, answers.projectName)
-    .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, answers.projectDescription)
-    .replace(/\{\{PROJECT_TYPE\}\}/g, answers.projectType)
-    .replace(/\{\{FRONTEND_FRAMEWORK\}\}/g, answers.frontendFramework)
-    .replace(/\{\{BACKEND_FRAMEWORK\}\}/g, answers.backendFramework)
-    .replace(/\{\{DATABASE\}\}/g, answers.database || "none")
-    .replace(/\{\{TEST_FRAMEWORK\}\}/g, answers.testFramework || "Bun test")
-    .replace(/\{\{OTHER_DEPS\}\}/g, "TBD")
-    .replace(/\{\{ARCHITECTURE_DESCRIPTION\}\}/g, "<!-- TODO: describe your architecture -->")
-    .replace(/\{\{DOMAIN_GLOSSARY\}\}/g, "<!-- TODO: define domain terms -->")
-    .replace(/\{\{KEY_TYPES\}\}/g, "<!-- TODO: paste key types here -->")
-    .replace(/\{\{INTEGRATIONS\}\}/g, "<!-- TODO: list external integrations -->")
-    .replace(/\{\{PROJECT_CONVENTIONS\}\}/g, "<!-- TODO: note any exceptions to global CLAUDE.md -->")
-    .replace(/\{\{OTHER_OFF_LIMITS\}\}/g, "<!-- TODO: add any other protected paths -->");
+    .replace(/\{\{PROJECT_NAME\}\}/g, () => answers.projectName)
+    .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, () => answers.projectDescription)
+    .replace(/\{\{PROJECT_TYPE\}\}/g, () => answers.projectType)
+    .replace(/\{\{FRONTEND_FRAMEWORK\}\}/g, () => answers.frontendFramework)
+    .replace(/\{\{BACKEND_FRAMEWORK\}\}/g, () => answers.backendFramework)
+    .replace(/\{\{DATABASE\}\}/g, () => answers.database || "none")
+    .replace(/\{\{TEST_FRAMEWORK\}\}/g, () => answers.testFramework || "Bun test")
+    .replace(/\{\{OTHER_DEPS\}\}/g, () => "TBD")
+    .replace(/\{\{ARCHITECTURE_DESCRIPTION\}\}/g, () => "<!-- TODO: describe your architecture -->")
+    .replace(/\{\{DOMAIN_GLOSSARY\}\}/g, () => "<!-- TODO: define domain terms -->")
+    .replace(/\{\{KEY_TYPES\}\}/g, () => "<!-- TODO: paste key types here -->")
+    .replace(/\{\{INTEGRATIONS\}\}/g, () => "<!-- TODO: list external integrations -->")
+    .replace(/\{\{PROJECT_CONVENTIONS\}\}/g, () => "<!-- TODO: note any exceptions to global CLAUDE.md -->")
+    .replace(/\{\{OTHER_OFF_LIMITS\}\}/g, () => "<!-- TODO: add any other protected paths -->");
 
 // ── Global CLAUDE.md check ────────────────────────────────────────────────────
 

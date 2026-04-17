@@ -309,7 +309,9 @@ Key changes:
 
 ## Phase 3 — Skills Directory Structure
 
-> Migrate from flat `commands/*.md` to `skills/<name>/SKILL.md` with supporting files.
+> Migrate from flat `commands/*.md` to `skills/<name>/SKILL.md` at the repo root.
+> `commands/` is deleted entirely once migration is complete.
+> Toolkit-only skills use `scope: global` frontmatter instead of a subdirectory.
 > Do one skill at a time. Each migration is its own commit.
 
 ### 3.1 Migrate `code-review`
@@ -317,12 +319,12 @@ Key changes:
 Extract the review rubric into a supporting file.
 
 ```
-commands/skills/code-review/
+skills/code-review/
   SKILL.md           ← frontmatter + invocation rules + output format
   review-rubric.md   ← the 6 criteria (correctness, FP, TS, tests, readability, architecture)
 ```
 
-- [ ] Create `commands/skills/code-review/` directory
+- [ ] Create `skills/code-review/`
 - [ ] Extract criteria into `review-rubric.md`
 - [ ] Write lean `SKILL.md` that references `review-rubric.md`
 - [ ] Delete `commands/code-review.md`
@@ -331,12 +333,12 @@ commands/skills/code-review/
 ### 3.2 Migrate `adversarial-review`
 
 ```
-commands/skills/adversarial-review/
+skills/adversarial-review/
   SKILL.md             ← frontmatter (context: fork, agent: adversarial-reviewer) + invocation rules
   attack-vectors.md    ← the what-to-look-for checklist (edge cases, architecture, logic, tests, security)
 ```
 
-- [ ] Create `commands/skills/adversarial-review/`
+- [ ] Create `skills/adversarial-review/`
 - [ ] Extract attack vectors into `attack-vectors.md`
 - [ ] Write `SKILL.md` with `context: fork`, `agent: adversarial-reviewer`
 - [ ] Delete `commands/adversarial-review.md`
@@ -345,7 +347,7 @@ commands/skills/adversarial-review/
 ### 3.3 Migrate `new-module`
 
 ```
-commands/skills/new-module/
+skills/new-module/
   SKILL.md              ← prompts, rules
   module-structure.md   ← the output structure template (index.ts, types.ts, etc.)
 ```
@@ -356,7 +358,7 @@ commands/skills/new-module/
 ### 3.4 Migrate `pr-description`
 
 ```
-commands/skills/pr-description/
+skills/pr-description/
   SKILL.md          ← instructions, git detection logic
   pr-template.md    ← the output format spec (title, summary, changed files, test plan)
 ```
@@ -364,7 +366,7 @@ commands/skills/pr-description/
 - [ ] Migrate `pr-description`
 - [ ] Commit: `refactor: migrate pr-description to skills directory`
 
-### 3.5 Migrate remaining commands
+### 3.5 Migrate remaining skills
 
 Migrate the rest individually:
 
@@ -372,20 +374,30 @@ Migrate the rest individually:
 - [ ] `bug-hunter` → extract phase checklist into `debug-phases.md`
 - [ ] `security-review` → extract OWASP checklist into `security-checklist.md`
 - [ ] `full-review`, `review-fix`, `review-fix-auto`, `implement-and-ship` (lean, no supporting files needed)
-- [ ] `commit`, `changelog`, `adr`, `update-context` (lean, no supporting files needed)
+- [ ] `commit`, `changelog`, `adr`, `update-context`, `new-phase`, `research` (lean, no supporting files needed)
+- [ ] `sync-docs` → add `scope: global` frontmatter (toolkit-only, deploy via install-global only)
 - [ ] Commit each migration separately
 
-### 3.6 Update deploy path convention
+### 3.6 Delete `commands/` directory
 
-After all migrations, update `CLAUDE.md` conventions comment:
+Once all skills are migrated:
+
+- [ ] Confirm `commands/` is empty (all flat files migrated, toolkit dir gone)
+- [ ] Delete `commands/`
+- [ ] Commit: `chore: remove commands/ — fully migrated to skills/`
+
+### 3.7 Update deploy path convention
+
+Update `CLAUDE.md` and `README.md` to reflect the new structure:
 
 ```
 # Before
 commands/ at the repo root is the source of truth. `.claude/commands/` is the deployed copy.
 
 # After
-commands/skills/ is the source of truth for skills. .claude/agents/ is the source of truth for agents.
-`.claude/skills/` and `.claude/agents/` are deployed copies — never edit there directly.
+skills/  → source of truth for skills  → deployed to .claude/skills/  (scope: global also to ~/.claude/skills/)
+agents/  → source of truth for agents  → deployed to .claude/agents/  (also to ~/.claude/agents/)
+Toolkit-only skills use scope: global frontmatter — deployed by install-global, not init.
 ```
 
 - [ ] Update `CLAUDE.md` conventions section
@@ -476,16 +488,19 @@ Add to `.claude/settings.json`:
 
 Current behavior: copies flat `.md` files from `commands/` to `~/.claude/commands/`.
 
-New behavior: copies skill directories from `commands/skills/` to `~/.claude/skills/`, and agents from `agents/` to `~/.claude/agents/`.
+New behavior:
+- Copies all skill directories from `skills/` to `~/.claude/skills/`
+- Skills with `scope: global` frontmatter are also copied during `init` to `.claude/skills/` — wait, no: `scope: global` means install-global only, skipped by init
+- Copies agents from `agents/` to `~/.claude/agents/`
 
-Key changes to `installCommandsFromDir`:
+Key changes:
 
 ```typescript
 // Current: copies file → ~/.claude/commands/file.md
 // New: copies directory → ~/.claude/skills/skill-name/ (with all files inside)
 
 const installSkillsFromDir = (srcDir: string, destDir: string): InstallResult[] => {
-  // Read skill directories (not flat .md files)
+  // Read skill directories from skills/
   // For each directory, copy SKILL.md + all supporting files
   // Maintain checksum per file within each skill directory
 }
@@ -509,10 +524,10 @@ Checksum tracking: extend to track individual files within skill directories. Ke
 
 Current behavior: copies flat `.md` files from `commands/` to `.claude/commands/`.
 
-New behavior: copies skill directories to `.claude/skills/`, creates `.claude/agents/` directory.
+New behavior: copies skill directories from `skills/` (excluding `scope: global` skills) to `.claude/skills/`, copies agents from `agents/` to `.claude/agents/`.
 
-- [ ] Update `scaffoldCommands` → `scaffoldSkills` to copy skill directories
-- [ ] Add `scaffoldAgents` to create `.claude/agents/` and copy relevant agents
+- [ ] Update `scaffoldCommands` → `scaffoldSkills` to copy skill directories, skipping `scope: global`
+- [ ] Add `scaffoldAgents` to copy `agents/` to `.claude/agents/`
 - [ ] Update `printResult` output to reflect new paths
 - [ ] Test: run `ai-init` in a test project and verify structure
 - [ ] Commit: `feat: update init to scaffold skills directories`

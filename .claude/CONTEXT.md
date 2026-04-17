@@ -8,56 +8,44 @@
 
 ## Current Focus
 
-- Dog-fooding the command set on the ai-dev-kit repo itself — testing commands on commands, docs, and scripts
-- Not yet using on the todo-app POC; that comes after this commit flow is validated
-- Nothing currently locked or off-limits
+- Continuing PLAN-skills-agents-migration.md on branch `dev-kit-refactor`
+- Phases 1–3 complete. Next: Phase 4 (Hooks), Phase 5 (Deploy scripts), Phase 6 (Backlog cleanup)
 
 ---
 
 ## Active Decisions
 
-<!-- Decisions made recently that affect how Claude should behave in this project.
-  These don't need a full ADR yet — just enough to avoid relitigating them. -->
-
-- `commands/toolkit/` is for toolkit-only commands — not deployed to projects via init, only via install-global
-- `commands/` universal commands are deployed by both init and install-global
+- `skills/` at root is source of truth for skills — deployed to `.claude/skills/` in target projects
+- `agents/` at root is source of truth for agents — deployed to `.claude/agents/` in target projects
+- `scope: global` frontmatter on a skill = install-global only, not init (replaces old `commands/toolkit/`)
+- `commands/` directory is gone — fully migrated to `skills/`
+- `.claude/` directory contents are gitignored artifacts — never edit deployed copies directly
+- All migration work is on `dev-kit-refactor` branch — one PR when phases complete
 - Slash commands are entered inside a `claude` session, not the terminal shell
 - FE/BE framework split in init prompts — `frontendFramework` and `backendFramework` are separate fields
-- `commands/` uses `readdirSync` dynamic discovery — no static file lists to maintain
 
 ---
 
 ## In Progress
 
-<!-- Work that is started but not complete. Helps Claude avoid stomping on WIP. -->
-
-- Uncommitted changes across `scripts/`, `commands/`, `templates/`, `README.md` from this session
-- Working through code-review → adversarial-review → pr-description → commit flow to validate commands
+- Nothing — all committed and clean
 
 ---
 
 ## Known Gotchas
 
-<!-- Things that will bite Claude if it doesn't know about them. -->
-
 - `shift+enter` newline binding doesn't work in standard Terminal.app — requires iTerm2 with CSI u mode enabled (Preferences → Profiles → Keys → Report modifiers using CSI u)
-- `commands/toolkit/` is intentionally invisible to `init` — adding a command there won't appear in scaffolded projects
-- Re-running `ai-init` in an existing project is safe but will never update existing command files, only create missing ones
+- Deploy scripts (`install-global.ts`, `init.ts`, `update.ts`) still reference `commands/` paths — they are broken until Phase 5 is done. Do not run them until then.
+- Re-running `ai-init` in an existing project is safe but will never update existing skill files, only create missing ones
 
 ---
 
 ## Next Up
 
-<!-- Queued work, in rough priority order. -->
-
-- Run `bun run install-global` to deploy new commands to `~/.claude/`
-- Run code-review → adversarial-review → pr-description → commit on current session changes
-- Add iTerm2 / CSI u note to README (shift+enter setup)
-- Backlog: init idempotency — skip prompts for already-answered fields on re-runs
-- Backlog: deploy a quickstart/README alongside commands when init runs on a new project
+- **Phase 4** — Hooks: `post-write-test.sh` (PostToolUse on Write/Edit) and `session-end-reminder.sh` (Stop event). Need `.claude/settings.json`. Note: hooks live in `.claude/` which is gitignored — need to decide if hooks source lives in a `hooks/` dir at root like skills/agents, or if they're configured differently. Raise this at start of next session.
+- **Phase 5** — Update `scripts/install-global.ts`, `scripts/init.ts`, `scripts/update.ts` for new `skills/` and `agents/` paths. Plan first before writing code.
+- **Phase 6** — Backlog cleanup: close review-agent item, fix `select()` NaN fallback, stale skills removal logic
 
 ---
 
 ## Session Notes
-
-<!-- Scratch space. Cleared between major milestones. -->

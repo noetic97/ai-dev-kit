@@ -67,7 +67,8 @@
 
 ## Conventions & Exceptions
 
-- `commands/` at the repo root is the source of truth for all slash commands. `.claude/commands/` is a deployed copy produced by `init` — never edit files there directly. Changes to commands belong in `commands/` (or `commands/toolkit/` for toolkit-only commands).
+- `skills/` at the repo root is the source of truth for all skills. `agents/` at the repo root is the source of truth for agents. Deploy scripts copy these to `.claude/skills/` and `.claude/agents/` in target projects — never edit deployed copies directly.
+- Skills with `scope: global` frontmatter are deployed by `install-global` only, not by `init`. Use this for toolkit-specific skills that don't belong in scaffolded projects.
 
 ---
 

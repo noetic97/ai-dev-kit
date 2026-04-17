@@ -10,13 +10,15 @@ templates/
   project-claude.md          ← project-level CLAUDE.md template (filled by init)
   context.md                 ← CONTEXT.md template (living session context)
   claudeignore               ← base .claudeignore
-commands/
-  *.md                       ← slash commands (deployed to projects via init)
-  toolkit/
-    *.md                     ← toolkit-only commands (deployed to ~/.claude only)
+skills/
+  <name>/
+    SKILL.md                 ← skill frontmatter + instructions (deployed to .claude/skills/)
+    *.md                     ← supporting files (rubrics, checklists, templates)
+agents/
+  *.md                       ← subagent definitions (deployed to .claude/agents/)
 scripts/
   init.ts                    ← scaffolds a new project interactively
-  install-global.ts          ← deploys CLAUDE.md + commands to ~/.claude/
+  install-global.ts          ← deploys CLAUDE.md + skills + agents to ~/.claude/
 ```
 
 ## Quick start
@@ -59,7 +61,8 @@ It will create:
 .claude/
   CLAUDE.md       ← project steering file (pre-filled from your answers)
   CONTEXT.md      ← living session context (never overwritten by re-runs)
-  commands/       ← slash commands copied from the kit
+  skills/         ← skills copied from the kit
+  agents/         ← subagents copied from the kit
 .claudeignore
 ```
 
@@ -98,9 +101,9 @@ claude
 /code-review
 ```
 
-Commands available after running `ai-init` in a project (`/` to see them in the chat input):
+Skills available after running `ai-init` in a project (`/` to see them in the chat input):
 
-| Command | Purpose |
+| Skill | Purpose |
 |---|---|
 | `/new-module` | Scaffold a new TypeScript module with types, logic, and tests |
 | `/adr` | Create an Architecture Decision Record |
@@ -114,17 +117,19 @@ Commands available after running `ai-init` in a project (`/` to see them in the 
 | `/commit` | Stage files and commit with a conventional commit message |
 | `/update-context` | Refresh `.claude/CONTEXT.md` with current project state |
 | `/changelog` | Generate a CHANGELOG entry from recent git history |
+| `/new-phase` | Scaffold a multi-session implementation phase with step-level tracking |
+| `/research` | Plan and document a technical research question into a structured file |
 | `/review-fix` | Work through review findings interactively, one fix at a time (manual mode) |
 | `/review-fix-auto` | Autonomously implement review findings, re-run the review, and loop until clean (max 3 passes) |
 | `/full-review` | Complete review-and-fix cycle: code review → fix loop → adversarial review → fix loop |
 
-### Toolkit-only commands
+### Toolkit-only skills
 
-These are deployed to `~/.claude/commands/` by `install-global` but are **not** copied to projects by `init` — they are specific to working in this repo.
+These are deployed to `~/.claude/skills/` by `install-global` but are **not** copied to projects by `init` — they are specific to working in this repo. Marked with `scope: global` in their frontmatter.
 
-| Command | Purpose |
+| Skill | Purpose |
 |---|---|
-| `/sync-docs` | Verify the README slash commands table matches the actual commands in `commands/` |
+| `/sync-docs` | Verify the README skills table matches the actual skills in `skills/` |
 
 ## Extending for a project
 
@@ -134,6 +139,6 @@ Edit `.claude/CLAUDE.md` in the project to:
 - Add domain-specific context, key types, and integration details
 - Update `## Current Focus` as work progresses
 
-## Adding new commands
+## Adding new skills
 
-Drop a `.md` file into `.claude/commands/` in any project, or add it here to make it available globally via the init script.
+Create a directory under `skills/` with a `SKILL.md` file. Add `scope: global` to the frontmatter for toolkit-only skills (deployed by `install-global` only, not `init`).

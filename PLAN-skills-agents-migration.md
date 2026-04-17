@@ -40,9 +40,9 @@ allowed-tools: Read, Grep, Glob, Bash
 ---
 ```
 
-- [ ] Add frontmatter to `commands/adversarial-review.md`
+- [x] Add frontmatter to `commands/adversarial-review.md`
 - [ ] Test: run `/adversarial-review` and confirm it runs in a forked context (you'll see a subagent indicator in the UI)
-- [ ] Commit: `feat: fork adversarial-review into isolated Explore subagent`
+- [x] Commit: `feat: fork adversarial-review into isolated Explore subagent`
 
 ### 1.2 Add frontmatter to remaining commands
 
@@ -172,9 +172,9 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 ```
 
-- [ ] Add frontmatter to all commands listed above
-- [ ] Note: model routing — `sonnet` for lightweight commands (commit, pr-description, changelog, update-context, adr), default (Opus) for review and implementation commands
-- [ ] Commit: `feat: add skill frontmatter to all commands`
+- [x] Add frontmatter to all commands listed above
+- [x] Note: model routing — `sonnet` for lightweight commands (commit, pr-description, changelog, update-context, adr), default (Opus) for review and implementation commands
+- [x] Commit: `feat: add skill frontmatter to all commands`
 
 ---
 
@@ -186,7 +186,7 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 
 This is the formal subagent definition that `adversarial-review` skill delegates to. Enforces read-only tool access at the agent level — not just in the prompt.
 
-**File:** `.claude/agents/adversarial-reviewer.md`
+**File:** `agents/adversarial-reviewer.md`
 ```markdown
 ---
 name: adversarial-reviewer
@@ -219,15 +219,15 @@ Rules:
 - Tone: rigorous, direct, no padding.
 ```
 
-- [ ] Create `.claude/agents/` directory
-- [ ] Create `.claude/agents/adversarial-reviewer.md`
-- [ ] Commit: `feat: add adversarial-reviewer subagent`
+- [x] Create `agents/` directory at repo root
+- [x] Create `agents/adversarial-reviewer.md`
+- [x] Commit: `feat: add adversarial-reviewer subagent`
 
 ### 2.2 Create diff-explorer agent
 
 A read-only agent that maps what changed and why before a review starts. Used by `full-review` to generate a changeset summary without polluting the main context.
 
-**File:** `.claude/agents/diff-explorer.md`
+**File:** `agents/diff-explorer.md`
 ```markdown
 ---
 name: diff-explorer
@@ -253,14 +253,14 @@ Keep it factual. No opinions on quality — that's the reviewer's job.
 Return your structured map as the final output.
 ```
 
-- [ ] Create `.claude/agents/diff-explorer.md`
-- [ ] Commit: `feat: add diff-explorer subagent`
+- [x] Create `agents/diff-explorer.md`
+- [x] Commit: `feat: add diff-explorer subagent`
 
 ### 2.3 Create security-auditor agent
 
 A reusable security-focused agent that can be invoked from `security-review` or independently.
 
-**File:** `.claude/agents/security-auditor.md`
+**File:** `agents/security-auditor.md`
 ```markdown
 ---
 name: security-auditor
@@ -290,8 +290,8 @@ Distinguish between theoretical risk and realistic exploitability.
 If a finding only applies under specific deployment assumptions, state them.
 ```
 
-- [ ] Create `.claude/agents/security-auditor.md`
-- [ ] Commit: `feat: add security-auditor subagent`
+- [x] Create `agents/security-auditor.md`
+- [x] Commit: `feat: add security-auditor subagent`
 
 ### 2.4 Update `full-review` to use agents explicitly
 
@@ -302,14 +302,16 @@ Key changes:
 - Step 3 (adversarial): explicitly invoke `adversarial-reviewer` subagent
 - Main context handles only the fix loops (needs Write access)
 
-- [ ] Update `commands/full-review.md` to reference `diff-explorer` and `adversarial-reviewer` agents
-- [ ] Commit: `refactor: wire full-review to use diff-explorer and adversarial-reviewer agents`
+- [x] Update `commands/full-review.md` to reference `diff-explorer` and `adversarial-reviewer` agents
+- [x] Commit: `refactor: wire full-review to use diff-explorer and adversarial-reviewer agents`
 
 ---
 
 ## Phase 3 — Skills Directory Structure
 
-> Migrate from flat `commands/*.md` to `skills/<name>/SKILL.md` with supporting files.
+> Migrate from flat `commands/*.md` to `skills/<name>/SKILL.md` at the repo root.
+> `commands/` is deleted entirely once migration is complete.
+> Toolkit-only skills use `scope: global` frontmatter instead of a subdirectory.
 > Do one skill at a time. Each migration is its own commit.
 
 ### 3.1 Migrate `code-review`
@@ -317,80 +319,90 @@ Key changes:
 Extract the review rubric into a supporting file.
 
 ```
-commands/skills/code-review/
+skills/code-review/
   SKILL.md           ← frontmatter + invocation rules + output format
   review-rubric.md   ← the 6 criteria (correctness, FP, TS, tests, readability, architecture)
 ```
 
-- [ ] Create `commands/skills/code-review/` directory
-- [ ] Extract criteria into `review-rubric.md`
-- [ ] Write lean `SKILL.md` that references `review-rubric.md`
-- [ ] Delete `commands/code-review.md`
-- [ ] Commit: `refactor: migrate code-review to skills directory structure`
+- [x] Create `skills/code-review/`
+- [x] Extract criteria into `review-rubric.md`
+- [x] Write lean `SKILL.md` that references `review-rubric.md`
+- [x] Delete `commands/code-review.md`
+- [x] Commit: `refactor: migrate code-review to skills directory structure`
 
 ### 3.2 Migrate `adversarial-review`
 
 ```
-commands/skills/adversarial-review/
+skills/adversarial-review/
   SKILL.md             ← frontmatter (context: fork, agent: adversarial-reviewer) + invocation rules
   attack-vectors.md    ← the what-to-look-for checklist (edge cases, architecture, logic, tests, security)
 ```
 
-- [ ] Create `commands/skills/adversarial-review/`
-- [ ] Extract attack vectors into `attack-vectors.md`
-- [ ] Write `SKILL.md` with `context: fork`, `agent: adversarial-reviewer`
-- [ ] Delete `commands/adversarial-review.md`
-- [ ] Commit: `refactor: migrate adversarial-review to skills directory`
+- [x] Create `skills/adversarial-review/`
+- [x] Extract attack vectors into `attack-vectors.md`
+- [x] Write `SKILL.md` with `context: fork`, `agent: adversarial-reviewer`
+- [x] Delete `commands/adversarial-review.md`
+- [x] Commit: `refactor: migrate adversarial-review to skills directory`
 
 ### 3.3 Migrate `new-module`
 
 ```
-commands/skills/new-module/
+skills/new-module/
   SKILL.md              ← prompts, rules
   module-structure.md   ← the output structure template (index.ts, types.ts, etc.)
 ```
 
-- [ ] Migrate `new-module`
-- [ ] Commit: `refactor: migrate new-module to skills directory`
+- [x] Migrate `new-module`
+- [x] Commit: `refactor: migrate new-module to skills directory`
 
 ### 3.4 Migrate `pr-description`
 
 ```
-commands/skills/pr-description/
+skills/pr-description/
   SKILL.md          ← instructions, git detection logic
   pr-template.md    ← the output format spec (title, summary, changed files, test plan)
 ```
 
-- [ ] Migrate `pr-description`
-- [ ] Commit: `refactor: migrate pr-description to skills directory`
+- [x] Migrate `pr-description`
+- [x] Commit: `refactor: migrate pr-description to skills directory`
 
-### 3.5 Migrate remaining commands
+### 3.5 Migrate remaining skills
 
 Migrate the rest individually:
 
-- [ ] `new-feature` → extract spec template into `spec-template.md`
-- [ ] `bug-hunter` → extract phase checklist into `debug-phases.md`
-- [ ] `security-review` → extract OWASP checklist into `security-checklist.md`
-- [ ] `full-review`, `review-fix`, `review-fix-auto`, `implement-and-ship` (lean, no supporting files needed)
-- [ ] `commit`, `changelog`, `adr`, `update-context` (lean, no supporting files needed)
-- [ ] Commit each migration separately
+- [x] `new-feature` → extract spec template into `spec-template.md`
+- [x] `bug-hunter` → extract phase checklist into `debug-phases.md`
+- [x] `security-review` → extract OWASP checklist into `security-checklist.md`
+- [x] `full-review`, `review-fix`, `review-fix-auto`, `implement-and-ship` (lean, no supporting files needed)
+- [x] `commit`, `changelog`, `adr`, `update-context`, `new-phase`, `research` (lean, no supporting files needed)
+- [x] `sync-docs` → add `scope: global` frontmatter (toolkit-only, deploy via install-global only)
+- [x] Commit each migration separately
 
-### 3.6 Update deploy path convention
+### 3.6 Delete `commands/` directory
 
-After all migrations, update `CLAUDE.md` conventions comment:
+Once all skills are migrated:
+
+- [x] Confirm `commands/` is empty (all flat files migrated, toolkit dir gone)
+- [x] Delete `commands/`
+- [x] Commit: `chore: remove commands/ — fully migrated to skills/`
+
+### 3.7 Update deploy path convention
+
+Update `CLAUDE.md` and `README.md` to reflect the new structure:
 
 ```
 # Before
 commands/ at the repo root is the source of truth. `.claude/commands/` is the deployed copy.
 
 # After
-commands/skills/ is the source of truth for skills. .claude/agents/ is the source of truth for agents.
-`.claude/skills/` and `.claude/agents/` are deployed copies — never edit there directly.
+skills/  → source of truth for skills  → deployed to .claude/skills/  (scope: global also to ~/.claude/skills/)
+agents/  → source of truth for agents  → deployed to .claude/agents/  (also to ~/.claude/agents/)
+Toolkit-only skills use scope: global frontmatter — deployed by install-global, not init.
 ```
 
-- [ ] Update `CLAUDE.md` conventions section
-- [ ] Update `README.md` table to reflect new structure
-- [ ] Commit: `docs: update conventions for skills directory structure`
+- [x] Update `CLAUDE.md` conventions section
+- [x] Update `README.md` table to reflect new structure
+- [x] Commit: `docs: update conventions for skills directory structure`
 
 ---
 
@@ -476,22 +488,25 @@ Add to `.claude/settings.json`:
 
 Current behavior: copies flat `.md` files from `commands/` to `~/.claude/commands/`.
 
-New behavior: copies skill directories from `commands/skills/` to `~/.claude/skills/`, and agents from `.claude/agents/` to `~/.claude/agents/`.
+New behavior:
+- Copies all skill directories from `skills/` to `~/.claude/skills/`
+- Skills with `scope: global` frontmatter are also copied during `init` to `.claude/skills/` — wait, no: `scope: global` means install-global only, skipped by init
+- Copies agents from `agents/` to `~/.claude/agents/`
 
-Key changes to `installCommandsFromDir`:
+Key changes:
 
 ```typescript
 // Current: copies file → ~/.claude/commands/file.md
 // New: copies directory → ~/.claude/skills/skill-name/ (with all files inside)
 
 const installSkillsFromDir = (srcDir: string, destDir: string): InstallResult[] => {
-  // Read skill directories (not flat .md files)
+  // Read skill directories from skills/
   // For each directory, copy SKILL.md + all supporting files
   // Maintain checksum per file within each skill directory
 }
 
 const installAgents = (): InstallResult[] => {
-  // Copy .claude/agents/*.md to ~/.claude/agents/
+  // Copy agents/*.md to ~/.claude/agents/
 }
 ```
 
@@ -509,10 +524,10 @@ Checksum tracking: extend to track individual files within skill directories. Ke
 
 Current behavior: copies flat `.md` files from `commands/` to `.claude/commands/`.
 
-New behavior: copies skill directories to `.claude/skills/`, creates `.claude/agents/` directory.
+New behavior: copies skill directories from `skills/` (excluding `scope: global` skills) to `.claude/skills/`, copies agents from `agents/` to `.claude/agents/`.
 
-- [ ] Update `scaffoldCommands` → `scaffoldSkills` to copy skill directories
-- [ ] Add `scaffoldAgents` to create `.claude/agents/` and copy relevant agents
+- [ ] Update `scaffoldCommands` → `scaffoldSkills` to copy skill directories, skipping `scope: global`
+- [ ] Add `scaffoldAgents` to copy `agents/` to `.claude/agents/`
 - [ ] Update `printResult` output to reflect new paths
 - [ ] Test: run `ai-init` in a test project and verify structure
 - [ ] Commit: `feat: update init to scaffold skills directories`
@@ -583,7 +598,7 @@ When a skill is deleted from the kit, deployed copies aren't removed. Add tracki
 
 **Skill description budget:** Claude loads all skill names but truncates descriptions past ~1536 chars. Front-load the key use case in each description. If a skill isn't auto-triggering when expected, the description may be getting cut.
 
-**Agent scope:** Project agents (`.claude/agents/`) are committed to the repo and shared. Personal agents (`~/.claude/agents/`) are for individual preferences. The kit's agents go in `.claude/agents/` since they're workflow tools, not personal style preferences.
+**Agent scope:** `agents/` at the repo root is the source of truth (mirrors `commands/`). Deploy scripts copy to `.claude/agents/` in target projects and `~/.claude/agents/` globally. Personal agents (`~/.claude/agents/`) are for individual preferences not belonging in the kit.
 
 **Model routing:** `model: sonnet` on lightweight commands (commit, pr, changelog, adr, update-context) vs default on reasoning-heavy ones (full-review, adversarial-review, new-feature). Revisit if cost becomes a concern.
 

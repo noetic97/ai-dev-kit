@@ -8,31 +8,26 @@
 
 ## Current Focus
 
-- Dog-fooding the command set on the ai-dev-kit repo itself — testing commands on commands, docs, and scripts
-- Not yet using on the todo-app POC; that comes after this commit flow is validated
-- Nothing currently locked or off-limits
+- Working through PLAN-skills-agents-migration.md — migrating commands to skills/agents structure
+- On branch `dev-kit-refactor` — all plan work goes here, single PR at end
 
 ---
 
 ## Active Decisions
-
-<!-- Decisions made recently that affect how Claude should behave in this project.
-  These don't need a full ADR yet — just enough to avoid relitigating them. -->
 
 - `commands/toolkit/` is for toolkit-only commands — not deployed to projects via init, only via install-global
 - `commands/` universal commands are deployed by both init and install-global
 - Slash commands are entered inside a `claude` session, not the terminal shell
 - FE/BE framework split in init prompts — `frontendFramework` and `backendFramework` are separate fields
 - `commands/` uses `readdirSync` dynamic discovery — no static file lists to maintain
+- `.claude/commands/` is gitignored — deployed copy is local-only, source of truth is `commands/`
+- All migration work is on `dev-kit-refactor` branch — one PR for the full plan
 
 ---
 
 ## In Progress
 
-<!-- Work that is started but not complete. Helps Claude avoid stomping on WIP. -->
-
-- Uncommitted changes across `scripts/`, `commands/`, `templates/`, `README.md` from this session
-- Working through code-review → adversarial-review → pr-description → commit flow to validate commands
+- Phase 1.2 — adding frontmatter to all remaining commands (next step)
 
 ---
 
@@ -48,13 +43,12 @@
 
 ## Next Up
 
-<!-- Queued work, in rough priority order. -->
-
-- Run `bun run install-global` to deploy new commands to `~/.claude/`
-- Run code-review → adversarial-review → pr-description → commit on current session changes
-- Add iTerm2 / CSI u note to README (shift+enter setup)
-- Backlog: init idempotency — skip prompts for already-answered fields on re-runs
-- Backlog: deploy a quickstart/README alongside commands when init runs on a new project
+- Phase 1.2: frontmatter on all remaining commands
+- Phase 2: create `.claude/agents/` with adversarial-reviewer, diff-explorer, security-auditor
+- Phase 3: migrate commands to `commands/skills/<name>/SKILL.md` directory structure
+- Phase 4: hooks (post-write test, session-end reminder)
+- Phase 5: update deploy scripts for new structure
+- Phase 6: backlog cleanup
 
 ---
 

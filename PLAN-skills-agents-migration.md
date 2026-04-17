@@ -40,9 +40,9 @@ allowed-tools: Read, Grep, Glob, Bash
 ---
 ```
 
-- [ ] Add frontmatter to `commands/adversarial-review.md`
+- [x] Add frontmatter to `commands/adversarial-review.md`
 - [ ] Test: run `/adversarial-review` and confirm it runs in a forked context (you'll see a subagent indicator in the UI)
-- [ ] Commit: `feat: fork adversarial-review into isolated Explore subagent`
+- [x] Commit: `feat: fork adversarial-review into isolated Explore subagent`
 
 ### 1.2 Add frontmatter to remaining commands
 

@@ -154,10 +154,15 @@ Legend: ✓ created  ⊕ merged into existing  – already present, skipped
 
 const recordChecksums = (results: InstallResult[]): void => {
   const existing = readChecksums(checksumsPath);
-  const updated = results.reduce<Checksums>(
-    (acc, { path, content }) => withHash(acc, path, content),
-    existing,
-  );
+  // Only record checksums for files the kit actually wrote. Skipped files keep their
+  // existing checksum entry unchanged — recording user-modified on-disk content would
+  // cause update.ts to treat the file as "unmodified" and silently overwrite it.
+  const updated = results
+    .filter(({ action }) => action !== "skipped")
+    .reduce<Checksums>(
+      (acc, { path, content }) => withHash(acc, path, content),
+      existing,
+    );
   writeChecksums(checksumsPath, updated);
 };
 

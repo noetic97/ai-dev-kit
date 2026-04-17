@@ -22,15 +22,19 @@ A CHANGELOG entry in [Keep a Changelog](https://keepachangelog.com) format:
 ## [Unreleased] — YYYY-MM-DD
 
 ### Added
+
 - ...
 
 ### Changed
+
 - ...
 
 ### Fixed
+
 - ...
 
 ### Removed
+
 - ...
 ```
 
@@ -39,6 +43,7 @@ Only include sections that have relevant commits. Omit empty sections.
 ## Grouping rules
 
 Map conventional commit types to CHANGELOG sections:
+
 - `feat:` → Added
 - `fix:` → Fixed
 - `refactor:`, `perf:` → Changed
@@ -52,5 +57,6 @@ frontend framework option" is better than "feat: add preact to FRONTEND_FRAMEWOR
 ## Output
 
 Print the entry first. Then ask whether to:
+
 1. Append it to `CHANGELOG.md` (create the file if it doesn't exist)
 2. Print only — the user will handle placement themselves

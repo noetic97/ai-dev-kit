@@ -38,6 +38,7 @@ before touching any files.
 Work through the confirmed issues in blocking-first order.
 
 For each issue:
+
 1. State what the problem is and where it lives (file:line or function name)
 2. Describe the fix you are about to make
 3. Apply the fix
@@ -51,9 +52,10 @@ the user says to run through all of them.
 ## Step 4 — Verify
 
 After all fixes are applied:
+
 - Re-read the original issue list and confirm each item is addressed or explicitly deferred
 - If any fix introduced new concerns, flag them — do not silently expand scope to fix them
-- Suggest running `/code-review` again if the fixes were substantial
+- Suggest running `/code-review` again if the fixes were substantial — scope it to only the files modified during this session, not the full original diff
 
 ---
 

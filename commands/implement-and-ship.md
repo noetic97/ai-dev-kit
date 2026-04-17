@@ -12,6 +12,7 @@ before committing. Work through each phase in order. Do not skip phases.
 ## Phase 1 — Scaffold
 
 Follow the `/new-module` workflow:
+
 - Ask for module name, purpose, inputs/outputs, and dependencies
 - Propose file structure and function signatures
 - Wait for approval before writing any code
@@ -22,7 +23,7 @@ Follow the `/new-module` workflow:
 ## Phase 2 — Review and fix
 
 Run `/full-review` on the newly scaffolded module. It will handle the complete cycle:
-code review → fix loop → adversarial review → fix loop, up to 3 passes each.
+code review → fix loop → adversarial review → fix loop, up to 2 passes each.
 
 If `/full-review` exhausts its passes with issues remaining, stop here and surface the
 outstanding findings to the user before proceeding.

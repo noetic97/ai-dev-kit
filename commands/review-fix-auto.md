@@ -26,10 +26,12 @@ If the findings contain **more than 8 Must Fix / Critical items**, stop here and
 Classify each finding:
 
 **Implement now**
+
 - Must Fix (from code-review) or Critical (from adversarial-review)
 - Should Fix items that are self-contained: fix touches ≤ ~20 lines and requires no architectural change
 
 **Add to `BACKLOG.md`, do not implement**
+
 - Should Fix items that are architectural, cross-cutting, or involve more than ~20 lines
 - Consider / informational findings
 
@@ -51,15 +53,15 @@ Do not refactor, rename, or touch anything not directly implicated by a finding.
 
 ## Step 4 — Re-run review
 
-Re-run the same review that produced the findings, against the same scope. Note this is **pass N** so the loop count is visible.
+Re-run the same review that produced the findings, scoped to only the files modified during Step 3. List which files are being re-reviewed — do not re-read the full original diff. Note this is **pass N** so the loop count is visible.
 
 ---
 
 ## Step 5 — Evaluate and loop
 
 - **No Must Fix / Critical findings remaining** → done. Report: passes taken, issues fixed, items deferred to backlog.
-- **Must Fix / Critical findings remain, pass < 3** → return to Step 3.
-- **Must Fix / Critical findings remain, pass = 3** → stop. Present a summary of what remains, what was attempted, and why it wasn't resolved. Ask the user for guidance.
+- **Must Fix / Critical findings remain, pass < 2** → return to Step 3.
+- **Must Fix / Critical findings remain, pass = 2** → stop. Present a summary of what remains, what was attempted, and why it wasn't resolved. Ask the user for guidance.
 
 Only Must Fix / Critical items count toward the loop termination condition. Should Fix items sent to backlog do not stall the loop.
 

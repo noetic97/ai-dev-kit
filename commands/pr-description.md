@@ -45,32 +45,30 @@ changeset, not generic.
 ## Create the PR
 
 After generating the description, detect whether a PR already exists for this branch,
-then output the appropriate ready-to-run command block.
+then push and create/update the PR by running the commands directly — do not print
+them as a code block for the user to run manually.
+
+Check for an existing PR:
 
 ```bash
-# Check for an existing PR on this branch
 tea pr list --repo <owner/repo> --output json 2>/dev/null
 ```
 
 Parse the JSON for an entry whose `head.ref` matches the current branch. If found, note the PR number.
 
-Write the description body to a temp file to avoid shell escaping issues with markdown content:
+Write the description body to a temp file to avoid shell escaping issues with markdown content, then run the push and create/update steps:
 
 ```bash
 cat > /tmp/pr-body.md <<'PRBODY'
 <generated body>
 PRBODY
-```
 
-Then output the push step plus the appropriate command:
-
-```bash
-# Push commits (skips if branch already on remote)
+# Push (skips if branch already on remote)
 git ls-remote --exit-code <remote> <current-branch> \
   && echo "branch already on remote" \
   || git push -u <remote> <current-branch>
 
-# If PR exists — update via Gitea API (tea pr edit does not exist):
+# If PR exists — update via Gitea API:
 tea api -X PATCH repos/<owner/repo>/pulls/<pr-number> \
   -f title="<generated title>" \
   -F body=@/tmp/pr-body.md
@@ -82,19 +80,41 @@ tea pr create \
   --description "$(cat /tmp/pr-body.md)" \
   --base <detected-base-branch> \
   --head <current-branch>
-
-# GitHub mirror alternative (gh CLI):
-# gh pr edit <pr-number> --repo <owner/repo> --title "<title>" --body "$(cat /tmp/pr-body.md)"
-# gh pr create --repo <owner/repo> --title "<title>" --body "$(cat /tmp/pr-body.md)" \
-#   --base <detected-base-branch> --head <current-branch>
 ```
 
-Output only the relevant block (update OR create) — not both. Never output `<placeholder>` text literally.
+Run only the relevant command (update OR create) — not both. Report the PR URL when done.
+
+## Wrap up
+
+After reporting the PR URL, do the following two things in order:
+
+### 1. Memory review
+
+Scan the session's work and ask: is there anything worth persisting to memory that isn't already
+there and isn't derivable from the code or git history?
+
+Look for:
+
+- **Feedback** — did the user correct an approach, confirm an unusual choice, or express a
+  preference that should change future behavior?
+- **Project decisions** — was a non-obvious architectural or product decision made that would
+  affect how future work should be scoped? (Only if not captured in an ADR or commit message.)
+- **User profile** — did you learn something new about the user's role, expertise, or working style?
+
+If yes to any of the above, write the memory file(s) now and update `MEMORY.md`. If nothing new
+was learned, say so explicitly — do not write empty or redundant entries.
+
+### 2. Prompt to start a new chat
+
+After completing the memory review, tell the user:
+
+> PR is up. To avoid quadratic token costs from a long conversation, consider starting a fresh
+> chat now with `/clear`.
 
 ## Rules
 
 - Read the full diff before writing anything — do not summarise from filenames alone
 - If any file in the diff is not reflected in the summary, flag it explicitly as potentially missing context
-- The title must accurately describe the *dominant* change, not just one part of it
+- The title must accurately describe the _dominant_ change, not just one part of it
 - Do not pad the summary — if it was a small change, the description should be short
 - Tone: direct, past tense ("add X", "fix Y", "remove Z")

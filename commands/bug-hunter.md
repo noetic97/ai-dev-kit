@@ -31,6 +31,7 @@ Stop when you have a clear enough picture to instrument the suspected code path.
 Before touching any logic, add temporary debug logging to make the code flow visible.
 
 **Instrument at these points:**
+
 - Entry to any function in the suspected path (log inputs)
 - Decision points: conditionals, early returns, branching logic (log which branch was taken)
 - Data transformations (log before and after)
@@ -38,6 +39,7 @@ Before touching any logic, add temporary debug logging to make the code flow vis
 - Exit points (log what is being returned)
 
 **Logging rules:**
+
 - Prefix all debug logs with `[bug-hunter]` so they are easy to find and remove later
 - Log the actual values, not just "reached here" — the data is what matters
 - Keep instrumentation minimal — only the suspected path, not the whole codebase
@@ -62,6 +64,7 @@ Confirm the hypothesis with me before writing a fix.
 ## Phase 4 — Fix
 
 Fix the root cause, not the symptom. For each change:
+
 - State what you are changing and why the log evidence points here
 - Keep the fix minimal — do not refactor surrounding code unless it is directly causing the bug
 - If the fix requires a larger change, surface that explicitly rather than silently expanding scope
@@ -71,6 +74,7 @@ Fix the root cause, not the symptom. For each change:
 ## Phase 5 — Clean up
 
 After the fix is confirmed:
+
 1. Remove all `[bug-hunter]` debug logs
 2. Write a regression test that would have caught this bug
 3. Note in `.claude/CONTEXT.md` under Known Gotchas if this reveals a systemic issue

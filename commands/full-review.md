@@ -30,12 +30,13 @@ Wait for confirmation before continuing. If the user overrides, note that findin
 Run `/code-review` on the specified scope.
 
 **If Must Fix or Should Fix findings are present:**
-> Passing findings to `/review-fix-auto` — pass 1 of 3.
+
+> Passing findings to `/review-fix-auto` — pass 1 of 2.
 
 Invoke `/review-fix-auto`. It will implement fixes, re-run code review, and loop up to 3 times.
 
 - If it resolves all Must Fix / Should Fix items → proceed to Step 3.
-- If it exhausts 3 passes with issues remaining → stop. Present the outstanding findings and ask the user how to proceed. Do not continue to adversarial review.
+- If it exhausts 2 passes with issues remaining → stop. Present the outstanding findings and ask the user how to proceed. Do not continue to adversarial review.
 
 **If no Must Fix or Should Fix findings:** proceed directly to Step 3.
 
@@ -46,12 +47,13 @@ Invoke `/review-fix-auto`. It will implement fixes, re-run code review, and loop
 Run `/adversarial-review` on the same scope.
 
 **If Critical or Should Fix findings are present:**
-> Passing findings to `/review-fix-auto` — pass 1 of 3.
+
+> Passing findings to `/review-fix-auto` — pass 1 of 2.
 
 Invoke `/review-fix-auto`. Same loop rules as Step 2.
 
 - If it resolves all Critical / Should Fix items → proceed to Step 4.
-- If it exhausts 3 passes with issues remaining → stop and surface to user.
+- If it exhausts 2 passes with issues remaining → stop and surface to user.
 
 **If no Critical or Should Fix findings:** proceed to Step 4.
 

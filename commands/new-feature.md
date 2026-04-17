@@ -19,7 +19,7 @@ before proposing anything. Good questions to ask (pick the relevant ones — do 
 - What are the edge cases or failure modes I should handle?
 - Are there constraints I should know about (performance, auth, existing data shapes)?
 - Does this touch existing functionality, or is it purely additive?
-- What should explicitly *not* be in scope for this feature?
+- What should explicitly _not_ be in scope for this feature?
 
 Stop asking questions when you have enough to write a spec. Two or three focused questions
 are better than an exhaustive list.
@@ -64,4 +64,4 @@ Once the spec is approved:
 After implementation, confirm each acceptance criterion is met. For any criterion that
 cannot be verified by a test, explain how to verify it manually.
 
-Then run `/code-review` and `/adversarial-review` before considering the feature done.
+Then run `/full-review` before considering the feature done. This runs the full quality gate — code review, fix loop, adversarial review, fix loop — and stops early if blockers are found at any stage.

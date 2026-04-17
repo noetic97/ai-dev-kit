@@ -13,13 +13,18 @@ git diff
 git diff --staged
 ```
 
-If the current branch is `main` or `master`, **stop immediately**. Warn the user:
+If the current branch is `main` or `master`, **do not commit directly**. Instead, create
+an appropriately named branch from the staged changes and switch to it:
 
-> ⚠ You are on `main`. Committing directly to the default branch is usually a mistake.
-> Create a feature branch first: `git checkout -b <branch-name>`
-> Or confirm explicitly that a direct commit to main is intentional before proceeding.
+```bash
+git checkout -b <type>/<short-description>
+```
 
-Do not stage or commit anything until the user confirms they want to proceed on main.
+Derive the branch name from the changes: use the conventional commit type as the prefix
+(`feat`, `fix`, `refactor`, `chore`, `docs`) and a short kebab-case description of the
+work. Example: `chore/commands-tooling`, `feat/thumbnail-cache`, `fix/zip-cancel-race`.
+
+Inform the user which branch was created before proceeding with the commit.
 
 ## Steps
 
@@ -28,23 +33,50 @@ Do not stage or commit anything until the user confirms they want to proceed on 
    When grouping is ambiguous (many untracked files across different concerns), print the full file list and ask which belong to this commit before staging anything. Do not guess.
 
 2. **Draft the commit message** — follow the conventional commit format:
+
    ```
    <type>: <concise description>
    ```
+
    Types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
 
-   The description should explain *what changed and why*, not just restate the filenames.
+   The description should explain _what changed and why_, not just restate the filenames.
    Keep it under 72 characters.
 
    If the change warrants it, add a short body (one blank line after the subject) with additional context.
 
-3. **Stage and commit**:
+3. **Update CONTEXT.md if warranted** — review what this commit changes and ask: does it affect
+   any section of `.claude/CONTEXT.md`? Specifically:
+   - Did an active decision get made or superseded? → update **Active Decisions**
+   - Did in-progress work complete or shift? → update **In Progress** or **Next Up**
+   - Was a new gotcha or constraint discovered? → add to **Known Gotchas**
+   - Did the current focus change? → update **Current Focus**
+
+   If yes to any of the above, update `.claude/CONTEXT.md` now and stage it as part of this
+   commit. Keep the update concise — bullet points, no prose. Do not clear **Session Notes**
+   unless the user explicitly says to.
+
+   If no section is affected, leave CONTEXT.md untouched.
+
+4. **Check for commands dir changes** — if any file being staged is under `.claude/commands/`
+   (excluding `commands-updates-ref.md` itself), add a row to `.claude/commands/commands-updates-ref.md`
+   before committing:
+
+   ```
+   | YYYY-MM-DD | <filename> | <one-line description of what changed> | <why> |
+   ```
+
+   Stage `commands-updates-ref.md` as part of the same commit.
+
+5. **Stage and commit**:
+
    ```bash
    git add <specific files>
    git commit -m "<message>"
    ```
 
    Always add the co-author trailer:
+
    ```
    Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
    ```

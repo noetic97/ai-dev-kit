@@ -15,7 +15,7 @@ const parseFrontmatter = (content: string): Readonly<Record<string, string>> => 
     if (colon === -1) return acc;
     const key = line.slice(0, colon).trim();
     const value = line.slice(colon + 1).trim();
-    if (key && value) acc[key] = value;
+    if (key && value) return { ...acc, [key]: value };
     return acc;
   }, {});
 };

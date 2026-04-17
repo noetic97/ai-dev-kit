@@ -209,14 +209,18 @@ const updateHooks = (
 // Removes kit-deployed files that no longer exist in the source directory.
 // Only removes files that are tracked in checksums — hand-added files are safe.
 
+// srcDir is null when the entire skill has been removed from source — treat as empty set,
+// meaning all kit-deployed files in destDir are stale and should be removed.
 const removeStaleFiles = (
-  srcDir: string,
+  srcDir: string | null,
   destDir: string,
   checksums: Checksums,
 ): { results: UpdateResult[]; checksums: Checksums } => {
   if (!existsSync(destDir)) return { results: [], checksums };
 
-  const srcFiles = existsSync(srcDir) ? new Set(readdirSync(srcDir)) : new Set<string>();
+  const srcFiles = srcDir !== null && existsSync(srcDir)
+    ? new Set(readdirSync(srcDir))
+    : new Set<string>();
 
   return readdirSync(destDir)
     .filter((f) => !statSync(join(destDir, f)).isDirectory())
@@ -252,7 +256,7 @@ const removeStaleSkills = (
         const destSkillDir = join(destDir, skillName);
 
         const { results, checksums: updated } = removeStaleFiles(
-          srcSkills.has(skillName) ? srcSkillDir : "",
+          srcSkills.has(skillName) ? srcSkillDir : null,
           destSkillDir,
           acc.checksums,
         );

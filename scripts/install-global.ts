@@ -26,7 +26,7 @@ import { checksumsPath, type Checksums, readChecksums, withHash, writeChecksums 
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type FileAction = "created" | "skipped";
+type FileAction = "created" | "merged" | "skipped";
 
 type InstallResult = {
   path: string;
@@ -51,9 +51,10 @@ const appendIfMissing = (path: string, content: string, marker: string): FileAct
   const existing = readFileSync(path, "utf-8");
   if (existing.includes(marker)) return "skipped";
   writeFileSync(path, `${existing}\n\n${content}`, "utf-8");
-  return "created"; // treated as a write for checksum purposes
+  return "merged";
 };
 
+// "merged" and "skipped" both result in files that differ from srcContent, so read back from disk.
 const contentOnDisk = (path: string, srcContent: string, action: FileAction): string =>
   action === "created" ? srcContent : readFileSync(path, "utf-8");
 
@@ -70,7 +71,6 @@ const installClaudeMd = (): InstallResult => {
 // Copies every file in a skill directory to the dest skill directory.
 // Never overwrites — preserves hand-edits.
 const installSkillDir = (
-  skillName: string,
   srcSkillDir: string,
   destSkillDir: string,
 ): InstallResult[] => {
@@ -101,7 +101,7 @@ const installSkills = (): InstallResult[] => {
   return readdirSync(srcDir).flatMap((entry) => {
     const srcSkillDir = join(srcDir, entry);
     if (!statSync(srcSkillDir).isDirectory()) return [];
-    return installSkillDir(entry, srcSkillDir, join(destDir, entry));
+    return installSkillDir(srcSkillDir, join(destDir, entry));
   });
 };
 
@@ -140,7 +140,7 @@ const installHooks = (): InstallResult[] =>
 // ── Output ────────────────────────────────────────────────────────────────────
 
 const printResults = (results: InstallResult[]): void => {
-  const icon: Record<FileAction, string> = { created: "✓", skipped: "–" };
+  const icon: Record<FileAction, string> = { created: "✓", merged: "⊕", skipped: "–" };
 
   console.log("\nInstalled:\n");
   for (const { path, action } of results) {
@@ -148,7 +148,7 @@ const printResults = (results: InstallResult[]): void => {
   }
 
   console.log(`
-Legend: ✓ created  – already present, skipped
+Legend: ✓ created  ⊕ merged into existing  – already present, skipped
 `);
 };
 

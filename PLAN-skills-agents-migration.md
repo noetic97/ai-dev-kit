@@ -219,9 +219,9 @@ Rules:
 - Tone: rigorous, direct, no padding.
 ```
 
-- [ ] Create `agents/` directory at repo root
-- [ ] Create `agents/adversarial-reviewer.md`
-- [ ] Commit: `feat: add adversarial-reviewer subagent`
+- [x] Create `agents/` directory at repo root
+- [x] Create `agents/adversarial-reviewer.md`
+- [x] Commit: `feat: add adversarial-reviewer subagent`
 
 ### 2.2 Create diff-explorer agent
 
@@ -253,8 +253,8 @@ Keep it factual. No opinions on quality — that's the reviewer's job.
 Return your structured map as the final output.
 ```
 
-- [ ] Create `agents/diff-explorer.md`
-- [ ] Commit: `feat: add diff-explorer subagent`
+- [x] Create `agents/diff-explorer.md`
+- [x] Commit: `feat: add diff-explorer subagent`
 
 ### 2.3 Create security-auditor agent
 
@@ -290,8 +290,8 @@ Distinguish between theoretical risk and realistic exploitability.
 If a finding only applies under specific deployment assumptions, state them.
 ```
 
-- [ ] Create `agents/security-auditor.md`
-- [ ] Commit: `feat: add security-auditor subagent`
+- [x] Create `agents/security-auditor.md`
+- [x] Commit: `feat: add security-auditor subagent`
 
 ### 2.4 Update `full-review` to use agents explicitly
 
@@ -302,8 +302,8 @@ Key changes:
 - Step 3 (adversarial): explicitly invoke `adversarial-reviewer` subagent
 - Main context handles only the fix loops (needs Write access)
 
-- [ ] Update `commands/full-review.md` to reference `diff-explorer` and `adversarial-reviewer` agents
-- [ ] Commit: `refactor: wire full-review to use diff-explorer and adversarial-reviewer agents`
+- [x] Update `commands/full-review.md` to reference `diff-explorer` and `adversarial-reviewer` agents
+- [x] Commit: `refactor: wire full-review to use diff-explorer and adversarial-reviewer agents`
 
 ---
 

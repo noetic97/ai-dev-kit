@@ -17,9 +17,16 @@ If no argument is given, default to the current git diff.
 
 ## Step 1 — Preflight check
 
-Run `git diff --stat` and assess the scope of changes.
+Invoke the `diff-explorer` subagent to map the changeset. It will run `git diff` and produce:
+- A plain-language changeset summary
+- Files changed with one-line annotations
+- Risk areas to focus on
+- Dependencies touched
+- Test coverage assessment
 
-If **more than 10 files** or **more than 400 lines** are changed:
+Use the `diff-explorer` output to inform scope for all subsequent steps. Pass it as context when invoking reviewers.
+
+If the diff-explorer reports **more than 10 files** or **more than 400 lines** changed:
 
 > ⚠ Large diff detected: [stat output]
 >
@@ -50,7 +57,7 @@ Invoke `/review-fix-auto`. It will implement fixes, re-run code review, and loop
 
 ## Step 3 — Adversarial review
 
-Run `/adversarial-review` on the same scope.
+Invoke the `adversarial-reviewer` subagent directly on the same scope. Pass the diff-explorer map from Step 1 as context so it knows where to focus. The adversarial-reviewer runs read-only in an isolated context — it cannot apply fixes, only surface findings.
 
 **If Critical or Should Fix findings are present:**
 

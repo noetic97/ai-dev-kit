@@ -86,11 +86,20 @@ const select = async (
   });
   console.log(`  ${options.length + 1}. Other`);
 
-  const raw = await prompt(`Choose 1–${options.length + 1}`, defaultChoice);
-  const index = parseInt(raw, 10) - 1;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const raw = await prompt(`Choose 1–${options.length + 1}`, defaultChoice);
+    const parsed = parseInt(raw, 10);
 
-  if (index === options.length) return prompt("Enter custom value", defaultValue ?? "");
-  return options[Math.max(0, Math.min(index, options.length - 1))]?.value ?? options[0].value;
+    if (isNaN(parsed) || parsed < 1 || parsed > options.length + 1) {
+      console.log(`  Please enter a number between 1 and ${options.length + 1}.`);
+      continue;
+    }
+
+    const index = parsed - 1;
+    if (index === options.length) return prompt("Enter custom value", defaultValue ?? "");
+    return options[index]?.value ?? options[0].value;
+  }
 };
 
 // ── Option lists ──────────────────────────────────────────────────────────────

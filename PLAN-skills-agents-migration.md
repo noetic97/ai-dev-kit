@@ -186,7 +186,7 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 
 This is the formal subagent definition that `adversarial-review` skill delegates to. Enforces read-only tool access at the agent level — not just in the prompt.
 
-**File:** `.claude/agents/adversarial-reviewer.md`
+**File:** `agents/adversarial-reviewer.md`
 ```markdown
 ---
 name: adversarial-reviewer
@@ -219,15 +219,15 @@ Rules:
 - Tone: rigorous, direct, no padding.
 ```
 
-- [ ] Create `.claude/agents/` directory
-- [ ] Create `.claude/agents/adversarial-reviewer.md`
+- [ ] Create `agents/` directory at repo root
+- [ ] Create `agents/adversarial-reviewer.md`
 - [ ] Commit: `feat: add adversarial-reviewer subagent`
 
 ### 2.2 Create diff-explorer agent
 
 A read-only agent that maps what changed and why before a review starts. Used by `full-review` to generate a changeset summary without polluting the main context.
 
-**File:** `.claude/agents/diff-explorer.md`
+**File:** `agents/diff-explorer.md`
 ```markdown
 ---
 name: diff-explorer
@@ -253,14 +253,14 @@ Keep it factual. No opinions on quality — that's the reviewer's job.
 Return your structured map as the final output.
 ```
 
-- [ ] Create `.claude/agents/diff-explorer.md`
+- [ ] Create `agents/diff-explorer.md`
 - [ ] Commit: `feat: add diff-explorer subagent`
 
 ### 2.3 Create security-auditor agent
 
 A reusable security-focused agent that can be invoked from `security-review` or independently.
 
-**File:** `.claude/agents/security-auditor.md`
+**File:** `agents/security-auditor.md`
 ```markdown
 ---
 name: security-auditor
@@ -290,7 +290,7 @@ Distinguish between theoretical risk and realistic exploitability.
 If a finding only applies under specific deployment assumptions, state them.
 ```
 
-- [ ] Create `.claude/agents/security-auditor.md`
+- [ ] Create `agents/security-auditor.md`
 - [ ] Commit: `feat: add security-auditor subagent`
 
 ### 2.4 Update `full-review` to use agents explicitly
@@ -476,7 +476,7 @@ Add to `.claude/settings.json`:
 
 Current behavior: copies flat `.md` files from `commands/` to `~/.claude/commands/`.
 
-New behavior: copies skill directories from `commands/skills/` to `~/.claude/skills/`, and agents from `.claude/agents/` to `~/.claude/agents/`.
+New behavior: copies skill directories from `commands/skills/` to `~/.claude/skills/`, and agents from `agents/` to `~/.claude/agents/`.
 
 Key changes to `installCommandsFromDir`:
 
@@ -491,7 +491,7 @@ const installSkillsFromDir = (srcDir: string, destDir: string): InstallResult[] 
 }
 
 const installAgents = (): InstallResult[] => {
-  // Copy .claude/agents/*.md to ~/.claude/agents/
+  // Copy agents/*.md to ~/.claude/agents/
 }
 ```
 
@@ -583,7 +583,7 @@ When a skill is deleted from the kit, deployed copies aren't removed. Add tracki
 
 **Skill description budget:** Claude loads all skill names but truncates descriptions past ~1536 chars. Front-load the key use case in each description. If a skill isn't auto-triggering when expected, the description may be getting cut.
 
-**Agent scope:** Project agents (`.claude/agents/`) are committed to the repo and shared. Personal agents (`~/.claude/agents/`) are for individual preferences. The kit's agents go in `.claude/agents/` since they're workflow tools, not personal style preferences.
+**Agent scope:** `agents/` at the repo root is the source of truth (mirrors `commands/`). Deploy scripts copy to `.claude/agents/` in target projects and `~/.claude/agents/` globally. Personal agents (`~/.claude/agents/`) are for individual preferences not belonging in the kit.
 
 **Model routing:** `model: sonnet` on lightweight commands (commit, pr, changelog, adr, update-context) vs default on reasoning-heavy ones (full-review, adversarial-review, new-feature). Revisit if cost becomes a concern.
 

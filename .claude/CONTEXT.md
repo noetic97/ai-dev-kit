@@ -8,8 +8,8 @@
 
 ## Current Focus
 
-- PLAN-skills-agents-migration.md **complete** — all 6 phases done on `main`
-- IMPL-post-migration-refinements.md **complete** — all 6 steps done
+- IMPL-post-migration-refinements.md **complete** — all 6 steps done, file deleted
+- Next phase: IMPL-kiro-companion-kit.md — minimal Kiro port, skills-only sharing
 
 ---
 
@@ -36,7 +36,6 @@ templates/context.md                       →   .claude/CONTEXT.md  (never-over
 ## Active Decisions
 
 - `commands/` directory is gone — fully migrated to `skills/`
-- All migration work is on `dev-kit-refactor` branch — one PR when phases complete
 - Slash commands are entered inside a `claude` session, not the terminal shell
 - FE/BE framework split in init prompts — `frontendFramework` and `backendFramework` are separate fields
 
@@ -57,8 +56,8 @@ templates/context.md                       →   .claude/CONTEXT.md  (never-over
 
 ## Next Up
 
+- IMPL-kiro-companion-kit.md Step 1 — create repo skeleton and README (`ai-kiro-kit` new repo)
 - **Backlog** — tests for scripts, `--dry-run` for update.ts, Verdaccio publish, framework-aware template injection
-- Close IMPL-post-migration-refinements.md (delete file, commit `chore: close post-migration refinements phase`)
 
 ---
 

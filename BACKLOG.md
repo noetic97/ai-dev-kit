@@ -20,6 +20,10 @@ Immediate next actions live in `.claude/CONTEXT.md` → Next Up.
 - **Fix B: framework-aware template injection** — when init detects a known framework (e.g. Preact), auto-inject framework-specific notes into `.claude/CLAUDE.md` (e.g. "use `preact/hooks`, not `react`").
 - **`gh pr create` integration in `/pr-description`** — for GitHub users: offer to run `gh pr create` directly after generating the description. Requires `gh` CLI installed and authenticated. Not needed for Gitea/tea setups.
 
+## Hooks
+
+- **Revisit `SessionEnd` hook event** — `SessionEnd` fires once at true session termination (vs. `Stop` which fires every turn). Would be a cleaner primitive for the session-end update-context reminder. Verify schema and stability when docs mature; currently absent from official hook schemas reference.
+
 ## Quality
 
 - **Tests for `scripts/init.ts` and `scripts/install-global.ts`** — especially `appendIfMissing`, `select`, `installCommandsFromDir`, and the conditional FE/BE branching. Required before v1.0.

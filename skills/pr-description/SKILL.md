@@ -93,7 +93,7 @@ After reporting the PR URL:
 
 ### 1. Prompt to start a new chat
 
-After completing the memory review, tell the user:
+Tell the user:
 
 > PR is up. To avoid quadratic token costs from a long conversation, consider starting a fresh
 > chat now with `/clear`.

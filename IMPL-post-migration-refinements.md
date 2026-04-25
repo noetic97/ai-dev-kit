@@ -22,7 +22,7 @@ At the end of every step:
 | Step | Description                                    | Status  | Branch | PR  |
 | ---- | ---------------------------------------------- | ------- | ------ | --- |
 | 1    | Align review loop pass limits                  | complete | fix/align-review-pass-limits | no PR |
-| 2    | Resolve memory system references in pr-description | pending | —      | —   |
+| 2    | Resolve memory system references in pr-description | complete | fix/pr-description-memory-section | no PR |
 | 3    | Guard post-write-test hook against kit scripts | complete | fix/hook-guard-kit-scripts | no PR |
 | 4    | Document `scope: global` in project template   | complete | docs/scope-global-convention | no PR |
 | 5    | Fill in this repo's own `.claude/CLAUDE.md`    | complete | docs/self-documenting-claude-md | no PR |

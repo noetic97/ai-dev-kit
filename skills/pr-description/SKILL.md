@@ -89,27 +89,11 @@ Run only the relevant command (update OR create) — not both. Report the PR URL
 
 ## Wrap up
 
-After reporting the PR URL, do the following two things in order:
+After reporting the PR URL:
 
-### 1. Memory review
+### 1. Prompt to start a new chat
 
-Scan the session's work and ask: is there anything worth persisting to memory that isn't already
-there and isn't derivable from the code or git history?
-
-Look for:
-
-- **Feedback** — did the user correct an approach, confirm an unusual choice, or express a
-  preference that should change future behavior?
-- **Project decisions** — was a non-obvious architectural or product decision made that would
-  affect how future work should be scoped? (Only if not captured in an ADR or commit message.)
-- **User profile** — did you learn something new about the user's role, expertise, or working style?
-
-If yes to any of the above, write the memory file(s) now and update `MEMORY.md`. If nothing new
-was learned, say so explicitly — do not write empty or redundant entries.
-
-### 2. Prompt to start a new chat
-
-After completing the memory review, tell the user:
+Tell the user:
 
 > PR is up. To avoid quadratic token costs from a long conversation, consider starting a fresh
 > chat now with `/clear`.

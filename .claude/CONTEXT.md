@@ -8,8 +8,9 @@
 
 ## Current Focus
 
-- IMPL-post-migration-refinements.md **complete** — all 6 steps done, file deleted
-- Next phase: IMPL-kiro-companion-kit.md — minimal Kiro port, skills-only sharing
+- IMPL-kiro-companion-kit.md — minimal Kiro port, skills-only sharing
+- Step 1 **complete** — `ai-kiro-kit` repo initialized at `github.com/noetic97/ai-kiro-kit`
+- **Future sessions for ai-kiro-kit work: start Claude Code from `/Users/noetic/repos/noetic97/ai-kiro-kit/`**
 
 ---
 
@@ -56,7 +57,7 @@ templates/context.md                       →   .claude/CONTEXT.md  (never-over
 
 ## Next Up
 
-- IMPL-kiro-companion-kit.md Step 1 — create repo skeleton and README (`ai-kiro-kit` new repo)
+- IMPL-kiro-companion-kit.md Step 2 — author initial steering files (open session from `ai-kiro-kit/`)
 - **Backlog** — tests for scripts, `--dry-run` for update.ts, Verdaccio publish, framework-aware template injection
 
 ---

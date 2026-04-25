@@ -6,7 +6,7 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 
 # /review-fix-auto
 
-Autonomously implement findings from the most recent code or adversarial review, re-run the review, and loop until clean or 3 passes are exhausted.
+Autonomously implement findings from the most recent code or adversarial review, re-run the review, and loop until clean or 2 passes are exhausted.
 
 > **Autonomous mode.** For manual step-by-step fixing with confirmations, use `/review-fix` instead.
 
@@ -67,7 +67,7 @@ Re-run the same review that produced the findings, scoped to only the files modi
 
 - **No Must Fix / Critical findings remaining** → done. Report: passes taken, issues fixed, items deferred to backlog.
 - **Must Fix / Critical findings remain, pass < 2** → return to Step 3.
-- **Must Fix / Critical findings remain, pass = 2** → stop. Present a summary of what remains, what was attempted, and why it wasn't resolved. Ask the user for guidance.
+- **Must Fix / Critical findings remain, pass = 2** → stop (pass 2 has completed and issues remain). Present a summary of what remains, what was attempted, and why it wasn't resolved. Ask the user for guidance.
 
 Only Must Fix / Critical items count toward the loop termination condition. Should Fix items sent to backlog do not stall the loop.
 

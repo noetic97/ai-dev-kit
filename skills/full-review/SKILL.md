@@ -46,7 +46,7 @@ Run `/code-review` on the specified scope.
 
 > Passing findings to `/review-fix-auto` — pass 1 of 2.
 
-Invoke `/review-fix-auto`. It will implement fixes, re-run code review, and loop up to 3 times.
+Invoke `/review-fix-auto`. It will implement fixes, re-run code review, and loop up to 2 passes.
 
 - If it resolves all Must Fix / Should Fix items → proceed to Step 3.
 - If it exhausts 2 passes with issues remaining → stop. Present the outstanding findings and ask the user how to proceed. Do not continue to adversarial review.

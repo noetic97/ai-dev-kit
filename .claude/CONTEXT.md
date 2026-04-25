@@ -56,7 +56,8 @@ templates/context.md                       →   .claude/CONTEXT.md  (never-over
 
 ## Next Up
 
-- **Backlog** — remaining items: tests for scripts, `--dry-run` for update.ts, Verdaccio publish, framework-aware template injection
+- Step 6 of IMPL-post-migration-refinements.md — upgrade session-end hook to trigger update-context (last remaining step)
+- **Backlog** — tests for scripts, `--dry-run` for update.ts, Verdaccio publish, framework-aware template injection
 
 ---
 

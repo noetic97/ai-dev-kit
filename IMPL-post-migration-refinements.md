@@ -26,7 +26,7 @@ At the end of every step:
 | 3    | Guard post-write-test hook against kit scripts | complete | fix/hook-guard-kit-scripts | no PR |
 | 4    | Document `scope: global` in project template   | complete | docs/scope-global-convention | no PR |
 | 5    | Fill in this repo's own `.claude/CLAUDE.md`    | complete | docs/self-documenting-claude-md | no PR |
-| 6    | Upgrade session-end hook to trigger update-context | pending | —      | —   |
+| 6    | Upgrade session-end hook to trigger update-context | complete | feat/session-end-context-prompt | no PR |
 
 ---
 

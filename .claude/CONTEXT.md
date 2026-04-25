@@ -9,6 +9,7 @@
 ## Current Focus
 
 - PLAN-skills-agents-migration.md **complete** — all 6 phases done on `main`
+- IMPL-post-migration-refinements.md **complete** — all 6 steps done
 
 ---
 
@@ -56,8 +57,8 @@ templates/context.md                       →   .claude/CONTEXT.md  (never-over
 
 ## Next Up
 
-- Step 6 of IMPL-post-migration-refinements.md — upgrade session-end hook to trigger update-context (last remaining step)
 - **Backlog** — tests for scripts, `--dry-run` for update.ts, Verdaccio publish, framework-aware template injection
+- Close IMPL-post-migration-refinements.md (delete file, commit `chore: close post-migration refinements phase`)
 
 ---
 

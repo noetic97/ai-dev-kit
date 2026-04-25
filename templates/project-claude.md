@@ -72,6 +72,8 @@
 <!-- Any project-specific deviations from the global CLAUDE.md.
   Example: "This project uses classes for database models due to the ORM." -->
 
+- Skills with `scope: global` frontmatter are toolkit-only — they are deployed to `~/.claude/skills/` by `install-global` but not to this project by `init`. Use this tag for skills that are specific to working on the kit itself, not on projects built with the kit.
+
 {{PROJECT_CONVENTIONS}}
 
 ---

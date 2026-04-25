@@ -26,42 +26,37 @@
 
 ## Architecture
 
-<!-- Describe the high-level structure. Example:
-  src/domain/    — pure business logic, no I/O
-  src/infra/     — database, external API clients
-  src/handlers/  — request handling, input validation
-  src/lib/       — shared utilities
--->
-
-<!-- TODO: describe your architecture -->
+```
+scripts/         — CLI entry points (init.ts, install-global.ts, update.ts)
+scripts/lib/     — pure helpers (checksums, frontmatter parsing)
+skills/          — skill source-of-truth (each skill is a directory with SKILL.md + supporting files)
+agents/          — subagent definitions (flat .md files)
+hooks/           — shell script hooks registered via templates/settings.json
+templates/       — file templates consumed by init and install-global
+```
 
 ---
 
 ## Domain Language
 
-<!-- Define key terms Claude should use consistently. Example:
-  - "User" = authenticated account holder
-  - "Member" = user within an organisation
-  - "Invoice" = a billable document, not "bill" or "receipt"
--->
-
-<!-- TODO: define domain terms -->
+- "Skill" = a directory under `skills/` with `SKILL.md` entry point; deployable capability
+- "Agent" = a subagent definition under `agents/`; specialist with isolated context and scoped tools
+- "Hook" = shell script in `hooks/` registered in `settings.json`; fires on Claude Code lifecycle events
+- "Kit" = the ai-dev-kit itself (the repo, not a deployed copy)
+- "Deployed artifact" = a file copied to `~/.claude/` or `.claude/` by `install-global` or `init`; gitignored in target projects
+- "Source of truth" = the canonical versioned location for skills/agents/hooks/templates (repo root)
 
 ---
 
 ## Key Data Models
 
-<!-- Paste or summarise your core types here so Claude has consistent context. -->
-
-<!-- TODO: paste key types here -->
+`scripts/lib/checksums.ts` defines `Checksums = Readonly<Record<string, string>>` — maps absolute dest path → SHA256 of content as originally installed. Used to distinguish unmodified kit files (safe to auto-update) from locally modified ones.
 
 ---
 
 ## External Integrations
 
-<!-- List APIs, services, and any auth patterns in use. -->
-
-<!-- TODO: list external integrations -->
+None. This is a local CLI tool — no external APIs, services, or network calls.
 
 ---
 
@@ -78,16 +73,15 @@
 
 - `.env` and any secrets files
 - `migrations/` — database migrations are written manually
-- <!-- TODO: add any other protected paths -->
 
 ---
 
 ## Security Posture
 
-- **Input trust boundary:** <!-- where does untrusted input enter the system? -->
-- **Auth mechanism:** <!-- JWT / session cookie / API key / none -->
-- **Secret management:** <!-- env vars / vault / none -->
-- Run `/security-review` before merging anything that touches auth, input handling, or external API calls.
+- **Input trust boundary:** stdin (prompts) and command-line args in `init.ts` and `install-global.ts`
+- **Auth mechanism:** none — local filesystem operations only
+- **Secret management:** none — kit never handles secrets
+- Run `/security-review` before merging anything that touches file-write logic, especially anything that could write outside the intended directories (`~/.claude/` or `.claude/`).
 
 ---
 

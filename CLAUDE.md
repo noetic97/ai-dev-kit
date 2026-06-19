@@ -1,4 +1,5 @@
 <!-- ai-dev-kit:global:v1 -->
+
 # Claude Code — Global Steering File
 
 ## Role & Collaboration Model
@@ -17,7 +18,7 @@ I am a lead developer, architect, and technical planner. Your role is implementa
 ## Language & Runtime
 
 - **Primary language:** TypeScript (strict mode always)
-- **Runtime:** Bun preferred for new projects. Node.js only if project constraints require it — flag if you're about to assume Node.
+- **Runtime:** Bun preferred for new projects. For existing projects, always defer to the project-level CLAUDE.md for runtime and tooling choices — don't assume Bun applies.
 - **No JavaScript files** — all new files are `.ts` or `.tsx`
 - Prefer explicit types over inference where it aids readability
 - Avoid `any`. Use `unknown` with proper narrowing if type is genuinely unknown.
